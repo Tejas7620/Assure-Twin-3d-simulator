@@ -127,7 +127,7 @@ export class PumpjackKinematics {
    * Circle 1: Center (0, H_post), Radius L_rear
    * Circle 2: Center P_c, Radius L_pitman
    */
-  private solveGeometry(crankAngle: number): {
+  public solveGeometry(crankAngle: number): {
     crankPin: { x: number; y: number };
     equalizer: { x: number; y: number };
     beamAngle: number;

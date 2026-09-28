@@ -134,17 +134,20 @@ class App {
     this.kinematics.setSPM(state.controls.spm);
     this.kinematics.setStrokeLength(state.controls.stroke_m);
 
+    // Exact closed-form 4-bar linkage solution
+    const geom = this.kinematics.solveGeometry(state.kinematics.crank_angle_rad);
+
     // Build KinematicState compatible with PumpjackModel
     const kState = {
       spm: state.controls.spm,
       crankAngle: state.kinematics.crank_angle_rad,
       crankAngleDeg: state.kinematics.crank_angle_deg,
-      beamAngle: Math.sin(state.kinematics.crank_angle_rad) * 0.12,
-      beamAngleDeg: Math.sin(state.kinematics.crank_angle_rad) * 6.8,
-      pitmanAngle: Math.cos(state.kinematics.crank_angle_rad) * 0.25,
-      crankPinPos: { x: -3.6 + Math.cos(state.kinematics.crank_angle_rad) * 0.75, y: 1.35 + Math.sin(state.kinematics.crank_angle_rad) * 0.75 },
-      equalizerPos: { x: -3.2, y: 5.2 - Math.sin(state.kinematics.crank_angle_rad) * 0.4 },
-      horseheadTipPos: { x: 4.0, y: 5.2 + Math.sin(state.kinematics.crank_angle_rad) * 0.5 },
+      beamAngle: geom.beamAngle,
+      beamAngleDeg: (geom.beamAngle * 180) / Math.PI,
+      pitmanAngle: geom.pitmanAngle,
+      crankPinPos: geom.crankPin,
+      equalizerPos: geom.equalizer,
+      horseheadTipPos: geom.horseheadTip,
       rodDisplacement: state.kinematics.rod_displacement_m,
       rodNormalizedPos: state.controls.stroke_m > 0 ? (state.kinematics.rod_displacement_m / state.controls.stroke_m) : 0,
       rodVelocity: Math.cos(state.kinematics.crank_angle_rad) * state.controls.spm * 0.15,
