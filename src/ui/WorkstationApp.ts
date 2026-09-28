@@ -21,6 +21,7 @@ import { OverviewView } from './pages/OverviewView.ts';
 import { SimulatorView } from './pages/SimulatorView.ts';
 import { WellStateView } from './pages/WellStateView.ts';
 import { ForecastView } from './pages/ForecastView.ts';
+import { PumpabilityView } from './pages/PumpabilityView.ts';
 import { ScenariosView } from './pages/ScenariosView.ts';
 import { OptimizationView } from './pages/OptimizationView.ts';
 import { RecommendationView } from './pages/RecommendationView.ts';
@@ -28,6 +29,7 @@ import { AssuranceView } from './pages/AssuranceView.ts';
 import { AlertsView } from './pages/AlertsView.ts';
 import { HistoryView } from './pages/HistoryView.ts';
 import { CalibrationView } from './pages/CalibrationView.ts';
+import { ReportsView } from './pages/ReportsView.ts';
 import { SettingsView } from './pages/SettingsView.ts';
 
 export class WorkstationApp {
@@ -49,6 +51,7 @@ export class WorkstationApp {
   private _simulatorView!: SimulatorView;
   private _wellStateView!: WellStateView;
   private _forecastView!: ForecastView;
+  private _pumpabilityView!: PumpabilityView;
   private _scenariosView!: ScenariosView;
   private _optimizationView!: OptimizationView;
   private _recommendationView!: RecommendationView;
@@ -56,6 +59,7 @@ export class WorkstationApp {
   private _alertsView!: AlertsView;
   private _historyView!: HistoryView;
   private _calibrationView!: CalibrationView;
+  private _reportsView!: ReportsView;
   private _settingsView!: SettingsView;
 
   constructor(
@@ -179,7 +183,15 @@ export class WorkstationApp {
     const calContainer = document.createElement('div');
     this._calibrationView = new CalibrationView(calContainer, this._assureManager);
 
-    // 12. Settings
+    // 12. Pumpability
+    const pvContainer = document.createElement('div');
+    this._pumpabilityView = new PumpabilityView(pvContainer, (page) => this.navigateTo(page as PageId));
+
+    // 13. Reports
+    const repContainer = document.createElement('div');
+    this._reportsView = new ReportsView(repContainer, this._assureManager);
+
+    // 14. Settings
     const setContainer = document.createElement('div');
     this._settingsView = new SettingsView(setContainer);
   }
@@ -204,6 +216,9 @@ export class WorkstationApp {
       case 'forecast':
         this._contentArea.appendChild(this._forecastView['_container']);
         break;
+      case 'pumpability':
+        this._contentArea.appendChild(this._pumpabilityView['_container']);
+        break;
       case 'scenarios':
         this._contentArea.appendChild(this._scenariosView['_container']);
         break;
@@ -224,6 +239,9 @@ export class WorkstationApp {
         break;
       case 'calibration':
         this._contentArea.appendChild(this._calibrationView['_container']);
+        break;
+      case 'reports':
+        this._contentArea.appendChild(this._reportsView['_container']);
         break;
       case 'settings':
         this._contentArea.appendChild(this._settingsView['_container']);
@@ -256,6 +274,8 @@ export class WorkstationApp {
       this._simulatorView?.update(state);
     } else if (this._activePageId === 'wellstate') {
       this._wellStateView?.update(state, sol);
+    } else if (this._activePageId === 'pumpability') {
+      this._pumpabilityView?.update(state, sol);
     }
   }
 
@@ -273,6 +293,8 @@ export class WorkstationApp {
       this._wellStateView?.update(state, solution);
     } else if (this._activePageId === 'forecast') {
       this._forecastView?.update(state, solution);
+    } else if (this._activePageId === 'pumpability') {
+      this._pumpabilityView?.update(state, solution);
     } else if (this._activePageId === 'scenarios') {
       this._scenariosView?.update(solution, this._assureManager.activeRehearsals);
     } else if (this._activePageId === 'optimization') {
@@ -287,6 +309,8 @@ export class WorkstationApp {
       this._historyView?.update(solution);
     } else if (this._activePageId === 'calibration') {
       this._calibrationView?.update(solution);
+    } else if (this._activePageId === 'reports') {
+      this._reportsView?.update(solution);
     }
   }
 }

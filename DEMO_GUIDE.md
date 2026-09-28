@@ -1,85 +1,94 @@
-# ASSURE-TWIN: Interactive Demo & Evaluation Guide
-
-This guide enables judges, engineers, and evaluators to explore the full decision journey in the live browser application (`http://localhost:5173/`).
-
----
-
-## 1. Quick Launch & Interface Layout
-1. Open `http://localhost:5173/` in Google Chrome or any modern browser.
-2. The application opens with a split view:
-   - **Left / Background**: The 3D Oil Well Simulator (API 11E Mark II unit, walking beam, horsehead, wellhead, flowline, separator tanks, realistic desert terrain).
-   - **Right**: The **ASSURE-TWIN Decision Center** glassmorphic drawer.
-   - **Top Right Bar**: Status pill (`ASSURE-TWIN | VERIFIED | 0d PUMPABLE`).
+# ASSURE-TWIN: Judge & Evaluator Demonstration Script
+**Smart India Hackathon 2026 — Problem Statement: SIH26120**  
+**Digital Twin for Well-to-Surface Optimization of CSS and SRP Operations for Heavy Oil Wells of Baghewala Field**
 
 ---
 
-## 2. Testing the Decision Journey (Tabs 01 to 06)
-
-### Step 1: Subsurface Visibility (Tab 01 - Virtual Downhole)
-- Click **"01. Virtual Downhole"**.
-- Review the 10 virtual sensor cards:
-  - Perforation Temperature ($T_{dh}$), Flowing Pressure ($P_{wf}$), Pump Intake Pressure ($PIP$).
-  - Dynamic Liquid Level, Crude Viscosity ($\mu_{dh}$), Subsurface Inflow.
-  - Pump Fillage, Rod Drag Force, Buoyant Rod Float Margin, Productivity Index.
-- Notice each card displays: Value, Units, Nominal Range, Confidence Score (e.g. 96%), and Provenance Tag (`MODEL-DERIVED` / `CALIBRATED`).
-
-### Step 2: Dynamic Moving Envelope (Tab 02 - Operating Envelope)
-- Click **"02. Operating Envelope"**.
-- View the 2D interactive canvas:
-  - **Green Region**: Safe/preferred operating window.
-  - **Upper Red Curve**: Critical Rod Float boundary.
-  - **Pulsing Dot**: The current operating point ($SPM = 3.2$, $T_{dh} = 72.6^\circ\text{ C}$).
-  - Notice the **Pumpability Window**: $0\text{ Days}$ remaining due to impending rod drag exceedance.
-  - Notice the **Next CSS Window**: Recommended mobilization Day 43-53.
-
-### Step 3: Counterfactual Digital Rehearsal (Tab 03 - Digital Rehearsal)
-- Click **"03. Digital Rehearsal"**.
-- Compare the 4 simulated candidates:
-  - **Current**: 0 gain, High Risk of Rod Float.
-  - **CSS Only**: +14 BOPD, Medium Risk of Fluid Pound.
-  - **SRP Only**: 0 gain, Low Risk, but heavy production sacrifice.
-  - **Joint (Recommended)**: **+19 BOPD**, High Robustness, float margin preserved.
-- Inspect the **Multi-Horizon Trajectory Table** (+1d, +3d, +7d, +14d).
-
-### Step 4: Decision Assurance & Approval (Tab 04 - Assurance Gate)
-- Click **"04. Assurance Gate"**.
-- Check the **12-Checkpoint Multi-Tier Assurance Gate**:
-  - Telemetry Quality, State Boundary, Calibration Check, Physics Validation, ML Consensus, OOD Detection, Pump Fillage, Rod Load Limit, Rod Float Margin, Energy Ceiling, Robustness Rating, Pumpability Horizon.
-- Read the **Causal Physical Reasoning (WHY?)**: 5-step mechanistic explanation.
-- Read the **Counterfactual Rejections (WHY NOT?)**: Transparent justifications for why alternative options were ruled out.
-- Click **"✓ APPROVE & ISSUE SETPOINT"**:
-  - Notice the status badge switches to `SETPOINT TRANSMITTED & ACTIVE`.
-  - Notice the approval timestamp and engineer credentials recorded.
-
-### Step 5: Provenance & Audit Trail (Tab 05 - Audit Trail)
-- Click **"05. Audit Trail"**.
-- Inspect the 11 cryptographic trace events with step types (`[OBSERVATION]`, `[STATE_ESTIMATE]`, `[ROBUSTNESS]`, `[CONSTRAINTS]`, etc.).
-
-### Step 6: Outcome Reconciliation & Recalibration (Tab 06 - Calibration Center)
-- Click **"06. Calibration Center"**.
-- Click **"⚡ SIMULATE OUTCOME (RECONCILE)"**:
-  - View simulated vs. observed field drift.
-  - View recommended parameter calibrations ($\lambda$, $b$, $S$, $C_{drag}$) with divergence percentages and `✓ Calibrate` action buttons.
+## 1. Quick Launch
+1. Ensure both the FastAPI backend and Vite frontend are running:
+   - Backend: `python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000`
+   - Frontend: `npm run dev`
+2. Open `http://localhost:5173/` in Google Chrome or any modern browser (recommended display: 1080p or 1440p).
 
 ---
 
-## 3. Testing Safety Edge Cases (Abstain Protocol)
-Use the top scenario chips to verify system safety behavior:
+## 2. Step-by-Step Judge Demonstration Flow
 
-1. **Click "Demo: Sensor Failure"**:
-   - Navigate to Tab 04.
-   - The green recommendation banner disappears, replaced by the prominent red banner:
-     `⛔ NO SAFE RECOMMENDATION (ASSURANCE GATE ACTIVE)`
-   - The button `🔍 REQUEST MORE DATA (PHASE 29)` appears.
-   - Failed gates are clearly highlighted.
-2. **Click "Normal Operation"**:
-   - Re-engages normal telemetry and clears gates back to verified status.
+### Scene 1: Command Center Overview & 3D Physical Twin
+1. **Top Header Inspection:**
+   - Note the well selector: **BGW-17A**, field: **Baghewala Heavy Oil Field**, mode: **Joint (CSS + SRP)**.
+   - Simulation time indicator: **Day 18.35**, and data quality indicator: **98% Good**.
+2. **8-Card KPI Row:**
+   - Observe live physics indicators with trend sparklines:
+     - Oil Production: **18.6 BOPD**
+     - Water Cut: **12.8%**
+     - Liquid Rate: **23.1 BPD**
+     - SOR: **6.4**
+     - Steam Rate: **19.3 TPD**
+     - Bottomhole Pressure: **18.2 bar**
+     - Average Downhole Temp: **72.7 °C**
+     - Viscosity: **1,392 cP**
+3. **Interactive 3D Digital Twin:**
+   - In the center viewport, observe the real-time API 11E Mark II pumpjack reciprocating with authentic kinematics.
+   - Look at the underground geological strata cutaway, casing, slotted liner, and thermal reservoir plume.
+   - Use the floating **Camera Presets** modal:
+     - Click **`[ Downhole View ]`** to orbit directly to the subsurface pump barrel and intake perforations.
+     - Click **`[ Dyno Card View ]`** to inspect the real-time dynamometer card.
+     - Click **`[ Surface Pumpjack ]`** to return to the surface facilities.
 
 ---
 
-## 4. Testing 3D Context & Click-To-Explain
-1. Click the `×` button at the top right of the Decision Center drawer.
-2. The drawer smoothly slides away, presenting the full 3D oil well view.
-3. Click on 3D components (e.g. sucker rod string, pumpjack walking beam, wellhead).
-4. The **INSPECTOR** popup card appears with detailed physical parameters (e.g. rod string grade, peak load, min load, viscous drag, and float margin).
-5. Click **"⚡ DECISION CENTER"** at top right to reopen the drawer anytime.
+### Scene 2: Subsurface Intelligence & Dynamic Operating Envelope
+1. **Pumpability Window:**
+   - Note the **18.4 DAYS** time-to-unfavorable boundary countdown gauge.
+   - Read the dominant driver: *"Cooling → viscosity rebound → reduced pumpability"*.
+2. **Dynamic Operating Envelope:**
+   - View the SPM vs Time canvas. Unlike static SCADA cards, this envelope dynamically contracts as reservoir heat dissipates.
+   - Inspect the 4 colored operational bands:
+     - **Unsafe Zone** (Red): Severe downstroke rod float and fluid pound risk.
+     - **Caution Zone** (Amber): Sub-optimal fillage / rod stress.
+     - **Safe Zone** (Green): Thermally and mechanically sustainable.
+     - **Preferred Zone** (Cyan): Maximized net oil recovery.
+   - Note the white marker representing **Current SPM (7.5)** and the projected trajectory line.
+3. **Model Domain (OOD) Check:**
+   - View the AI governance card: **Within validated domain**, OOD Score: **0.23**, Physics/ML Agreement: **Good (Δ 6.2%)**.
+4. **12-Point Zero-Trust Assurance Gate:**
+   - Inspect all 12 real engineering checks: Thermal Envelope, Float Margin, Pump Fillage, Rod Load, Impact/Stress, Steam Constraints, Data Freshness, Model Domain, Physics/ML Agreement, Uncertainty, Historical Consistency, and Integrity/Sanity.
+
+---
+
+### Scene 3: Forward Decision Rehearsal & Optimization
+1. **Middle Row Analytics:**
+   - **Future Trajectory (30 Days):** Multi-horizon forecast tracking Oil Rate, SOR, Pump Fillage, and Viscosity rebound.
+   - **Scenario Comparison:** Side-by-side comparative metrics for Current, Proposed, and Rehearsed setpoints.
+   - **Recommendation Card:** Displays verified setpoints (SPM 6.7, Stroke 52 in, Steam Rate 19.8 TPD) with explainable WHY and counterfactual WHY-NOT justifications.
+2. **Left Navigation Deep-Dives:**
+   - Click **`Pumpability`** to view the full degradation trajectory and sensitivity curves.
+   - Click **`Optimization`** to view Pareto trade-offs and candidate grids.
+   - Click **`Reports`** to view the certified engineering report with SHA-256 seal.
+   - Return to **`Overview`**.
+
+---
+
+### Scene 4: The Ultimate Judge Test — Safety Abstain Protocol
+1. Scroll to the footer **Quick Actions** panel.
+2. Click the amber trigger button: **`[ 🧪 DEMO: Abnormal Viscosity ]`**.
+3. **Observe the Immediate Multi-Tier System Response:**
+   - An abnormal cold-slug viscosity surge (+14,500 cP) is injected into the well fluid.
+   - The Dynamic Operating Envelope collapses downward as viscous drag rises.
+   - The Pumpability countdown drops to **0.0 DAYS (CRITICAL)**.
+   - The 12-Point Assurance Gate trips on **Float Margin** (rod cannot fall through cold oil without buckling).
+   - The recommendation card instantly transitions to a prominent red alert state: **NO SAFE RECOMMENDATION (ABSTAIN)**.
+   - Transparently explains to the operator: *"All evaluated operating points violate the 15% rod float safety margin. Intervention required: Schedule steam cycle or hot oil treatment."*
+4. Click **`[ 🔄 Reset Demo ]`** to instantly restore baseline telemetry and clear the fault.
+
+---
+
+### Scene 5: Cryptographic Certified Engineering Report
+1. Click **`Reports`** in the left sidebar (or click **`[ Generate Report ]`** in Quick Actions).
+2. Inspect the **Official Engineering Sign-Off Report**:
+   - Field asset metadata, current operating state, proposed setpoints, and forecast outcomes.
+   - Formal zero-trust assurance audit checklist with PASS/WARN/FAIL statuses.
+   - Unique Cryptographic SHA-256 Audit Seal (e.g. `SHA256:d8a2...`).
+   - Honest provenance disclaimers explicitly identifying model-derived projections.
+3. Click **`[ Export PDF / Print ]`** to demonstrate field compliance export.

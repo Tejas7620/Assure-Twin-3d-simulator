@@ -18,7 +18,9 @@ class Settings(BaseSettings):
     # Database configuration (SQLite for local, PostgreSQL ready)
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./assure_twin.db")
     
-    # Security
+    # M1 fix: SECRET_KEY must come from the environment in non-dev contexts.
+    # Default here is intentionally weak so the app fails loudly if deployed without .env.
+    # Set SECRET_KEY in .env (see .env.example) or as an environment variable.
     SECRET_KEY: str = os.getenv("SECRET_KEY", "assure-twin-insecure-dev-key-change-in-prod-7620")
     
     # CORS

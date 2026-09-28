@@ -42,6 +42,28 @@ export class TrajectoryChart {
     this.render();
   }
 
+  public updateFromForecast(points: { day: number; temperature: number; viscosity: number; oil_rate: number; float_margin: number }[]): void {
+    this._points = points.map(p => ({
+      day: p.day,
+      tempNormalized: Math.max(5, Math.min(95, (p.temperature / 100) * 100)),
+      viscNormalized: Math.max(5, Math.min(95, (Math.log10(Math.max(10, p.viscosity)) / 4.5) * 100)),
+      oilNormalized: Math.max(5, Math.min(95, (p.oil_rate / 60) * 100)),
+      floatNormalized: Math.max(5, Math.min(95, (p.float_margin / 40) * 100))
+    }));
+    this.render();
+  }
+
+  public updateFromTrajectory(points: { dayOffset: number; temperatureC: number; viscosityCp: number; oilRateBopd: number; floatMarginPct: number }[]): void {
+    this._points = points.map(p => ({
+      day: p.dayOffset,
+      tempNormalized: Math.max(5, Math.min(95, (p.temperatureC / 100) * 100)),
+      viscNormalized: Math.max(5, Math.min(95, (Math.log10(Math.max(10, p.viscosityCp)) / 4.5) * 100)),
+      oilNormalized: Math.max(5, Math.min(95, (p.oilRateBopd / 60) * 100)),
+      floatNormalized: Math.max(5, Math.min(95, (p.floatMarginPct / 40) * 100))
+    }));
+    this.render();
+  }
+
   private generateDefaultPoints(days: number): void {
     this._points = [];
     for (let d = 0; d <= days; d++) {

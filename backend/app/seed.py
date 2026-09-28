@@ -180,11 +180,21 @@ def seed_database():
         print("[SEED] Seeding ML Model Registry and Audit Events...")
         model_ver = ModelVersion(
             id="ml-mod-01",
-            name="Baghewala Heavy Oil Viscosity & Inflow Surrogate",
-            version="v2.4.1-calibrated",
-            model_type="HYBRID_PHYSICS_ML",
-            description="Neural surrogate trained on Baghewala CSS cycles with Marx-Langenheim physics prior.",
-            artifact_reference="models/baghewala_v2_4_1.onnx",
+            name="Baghewala Heavy Oil CSS Surrogate",
+            version="v2.4.1-synthetic",
+            model_type="RandomForestEnsemble",
+            # H1 fix: honest model description — not a neural network, not a pre-trained artifact.
+            # This model is a RandomForestRegressor (3 trees: temp, oil, sor), trained at
+            # application boot on seeded synthetic data from SyntheticDataGenerator(seed=42).
+            # Metrics are computed on an 80/20 holdout split (see ai/surrogate.py).
+            # No .onnx or other artifact file exists; model is rebuilt from seed on each boot.
+            description=(
+                "RandomForestEnsemble surrogate (sklearn) trained at boot on 200-sample synthetic "
+                "dataset (SyntheticDataGenerator, seed=42). Physics prior: Marx-Langenheim thermal, "
+                "Andrade viscosity, Darcy IPR. Metrics are holdout-measured (r2_temp/oil/sor). "
+                "No ONNX artifact — model is seeded and rebuilt deterministically on startup."
+            ),
+            artifact_reference=None,  # No saved artifact — rebuilt from seed at each boot
             active=True
         )
         db.add(model_ver)

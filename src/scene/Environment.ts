@@ -35,10 +35,35 @@ export class Environment {
       position: new THREE.Vector3(2.5, 7.5, 24.5),
       target: new THREE.Vector3(2.5, 1.5, 0.0)
     },
+    resetView: {
+      name: 'Default Reference View',
+      position: new THREE.Vector3(2.5, 7.5, 24.5),
+      target: new THREE.Vector3(2.5, 1.5, 0.0)
+    },
     srpUnit: {
-      name: 'SRP Pumpjack Unit',
+      name: 'Surface Pumpjack',
       position: new THREE.Vector3(1.5, 5.8, 11.5),
       target: new THREE.Vector3(1.5, 3.2, 0.0)
+    },
+    surfacePumpjack: {
+      name: 'Surface Pumpjack',
+      position: new THREE.Vector3(1.5, 5.8, 11.5),
+      target: new THREE.Vector3(1.5, 3.2, 0.0)
+    },
+    downholeView: {
+      name: 'Downhole View',
+      position: new THREE.Vector3(6.0, -5.2, 11.0),
+      target: new THREE.Vector3(6.0, -6.5, 0.0)
+    },
+    perforationsView: {
+      name: 'Perforations View',
+      position: new THREE.Vector3(3.0, -9.2, 8.5),
+      target: new THREE.Vector3(4.5, -9.8, -0.4)
+    },
+    dynoCardView: {
+      name: 'Dyno Card View',
+      position: new THREE.Vector3(3.2, 4.0, 5.2),
+      target: new THREE.Vector3(3.0, 3.0, 0.0)
     },
     steamPlant: {
       name: 'Steam Generator Plant',

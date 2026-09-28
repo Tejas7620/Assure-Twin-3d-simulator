@@ -256,6 +256,19 @@ export class AssureApiClient {
     return res || [];
   }
 
+  /** M2 + C1 fix: Generate a fresh recommendation from current twin state (§108). */
+  async generateRecommendation(weights?: {
+    crude_revenue?: number;
+    steam_penalty?: number;
+    power_penalty?: number;
+    mechanical_risk?: number;
+  }): Promise<RecommendationCase | null> {
+    return this.fetchJson<RecommendationCase>('/api/v1/recommendations/generate', {
+      method: 'POST',
+      body: weights ? JSON.stringify(weights) : undefined
+    });
+  }
+
   async approveRecommendation(caseId: string, actor: string = 'Senior Petroleum Engineer'): Promise<RecommendationCase | null> {
     return this.fetchJson<RecommendationCase>(`/api/v1/recommendations/${caseId}/approve`, {
       method: 'POST',
@@ -269,6 +282,7 @@ export class AssureApiClient {
       body: JSON.stringify({ actor, notes: notes || 'Rejected by engineer' })
     });
   }
+
 
   // Assurance
   async getAssuranceGate(): Promise<AssuranceResult | null> {
@@ -284,6 +298,28 @@ export class AssureApiClient {
   async acknowledgeAlert(alertId: string): Promise<any> {
     return this.fetchJson(`/api/v1/alerts/${alertId}/acknowledge`, {
       method: 'POST'
+    });
+  }
+
+  // Calibration
+  async reconcileOutcome(predictedOilBpd: number[], actualOilBpd: number[]): Promise<any> {
+    return this.fetchJson('/api/v1/calibration/reconcile', {
+      method: 'POST',
+      body: JSON.stringify({
+        predicted_oil_bpd: predictedOilBpd,
+        actual_oil_bpd: actualOilBpd
+      })
+    });
+  }
+
+  async fitViscosity(temperaturesC: number[], viscositiesCp: number[], applyToWell = false): Promise<any> {
+    return this.fetchJson('/api/v1/calibration/fit-viscosity', {
+      method: 'POST',
+      body: JSON.stringify({
+        temperatures_c: temperaturesC,
+        viscosities_cp: viscositiesCp,
+        apply_to_active_well: applyToWell
+      })
     });
   }
 }

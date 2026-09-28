@@ -67,8 +67,8 @@ export class TopHeader {
           <div class="ws-header-item">
             <span class="ws-item-label">SIMULATION TIME</span>
             <div class="ws-time-box">
-              <span class="ws-time-days" id="hdr-sim-days">41.2 days</span>
-              <span class="ws-time-clock" id="hdr-sim-clock">08:35:10</span>
+              <span class="ws-time-days" id="hdr-sim-days">Day 18.35</span>
+              <span class="ws-time-clock" id="hdr-sim-clock">08:15:42 AM</span>
               <button class="ws-btn-play" id="hdr-btn-play" title="Play/Pause Simulation">
                 <svg viewBox="0 0 24 24" id="hdr-play-icon"><polygon points="6 4 20 12 6 20 6 4"/></svg>
               </button>
@@ -86,13 +86,13 @@ export class TopHeader {
               <div class="ws-dq-ring">
                 <svg viewBox="0 0 36 36" class="ws-dq-svg">
                   <path class="ws-dq-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="ws-dq-fill" id="hdr-dq-fill" stroke-dasharray="94, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="ws-dq-fill" id="hdr-dq-fill" stroke-dasharray="98, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                 </svg>
-                <span class="ws-dq-text" id="hdr-dq-pct">94%</span>
+                <span class="ws-dq-text" id="hdr-dq-pct">98%</span>
               </div>
               <div class="ws-dq-status">
-                <span class="ws-dq-num" id="hdr-dq-val">94%</span>
-                <span class="ws-dq-lbl" id="hdr-dq-state">Good</span>
+                <span class="ws-dq-num" id="hdr-dq-val">98%</span>
+                <span class="ws-dq-lbl good" id="hdr-dq-state">Good</span>
               </div>
             </div>
           </div>
@@ -101,7 +101,7 @@ export class TopHeader {
           <div class="ws-header-item">
             <span class="ws-item-label">LAST UPDATED</span>
             <div class="ws-update-box">
-              <span class="ws-update-time" id="hdr-update-time">10:35:42 AM</span>
+              <span class="ws-update-time" id="hdr-update-time">08:15:42 AM</span>
               <span class="ws-update-date">May 20, 2026</span>
             </div>
           </div>
@@ -109,10 +109,10 @@ export class TopHeader {
 
         <!-- RIGHT UTILITY ICONS -->
         <div class="ws-header-right">
-          <!-- Notification Bell -->
-          <button class="ws-hdr-icon-btn" id="hdr-btn-bell" title="Alerts & Notifications">
+          <!-- Notification Bell with Count 2 -->
+          <button class="ws-hdr-icon-btn" id="hdr-btn-bell" title="Alerts & Notifications (2 unread)">
             <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span class="ws-badge-dot"></span>
+            <span class="ws-badge-count">2</span>
           </button>
 
           <!-- User Profile -->
@@ -120,10 +120,10 @@ export class TopHeader {
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </button>
 
-          <!-- System Healthy status indicator -->
-          <div class="ws-system-status">
+          <!-- System Normal status indicator -->
+          <div class="ws-system-status" id="hdr-system-status-container">
             <span class="ws-dot-live"></span>
-            <span class="ws-status-text" id="hdr-system-health">System Healthy</span>
+            <span class="ws-status-text" id="hdr-system-health">System Normal</span>
           </div>
         </div>
       </header>
@@ -170,7 +170,7 @@ export class TopHeader {
   public update(simState: SimulationState, solutionState: SolutionState): void {
     const daysEl = this._container.querySelector('#hdr-sim-days');
     if (daysEl) {
-      daysEl.textContent = `${simState.time.sim_time_days.toFixed(1)} days`;
+      daysEl.textContent = `Day ${simState.time.sim_time_days.toFixed(2)}`;
     }
 
     const dqPct = solutionState.dataQuality.score;
@@ -188,8 +188,18 @@ export class TopHeader {
     }
 
     const healthEl = this._container.querySelector('#hdr-system-health');
-    if (healthEl) {
-      healthEl.textContent = solutionState.wellHealth === 'CRITICAL' ? 'System Warning' : 'System Healthy';
+    const statusContainer = this._container.querySelector('#hdr-system-status-container');
+    if (healthEl && statusContainer) {
+      if (solutionState.wellHealth === 'CRITICAL') {
+        healthEl.textContent = 'System Critical';
+        statusContainer.className = 'ws-system-status critical';
+      } else if (solutionState.wellHealth === 'WARNING') {
+        healthEl.textContent = 'System Warning';
+        statusContainer.className = 'ws-system-status warning';
+      } else {
+        healthEl.textContent = 'System Normal';
+        statusContainer.className = 'ws-system-status normal';
+      }
     }
   }
 }

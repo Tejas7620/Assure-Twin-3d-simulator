@@ -108,11 +108,32 @@ export class RecommendationView {
   private bindEvents(): void {
     const btnApprove = this._container.querySelector('#rec-btn-approve');
     btnApprove?.addEventListener('click', async () => {
-      // 1. Call backend API for cryptographic audit recording
+      // M2 fix: Use the actual active case ID from AssureTwinManager, not a hardcoded literal.
+      const activeCase = this._assureManager.activeRecommendationCase;
+
+      // 1. Call backend: first generate (if not yet done), then approve by real ID
       try {
-        await assureApiClient.approveRecommendation('REC-2026-BGW-004', 'Senior Production Engineer (ONGC / Baghewala Asset)');
+        let caseId: string | null = null;
+
+        // Generate a fresh recommendation from twin state (C1 fix: dynamic, not hardcoded)
+        const generated = await assureApiClient.generateRecommendation();
+        if (generated?.case_id) {
+          caseId = generated.case_id;
+        } else if (activeCase?.recommendationId) {
+          // Fall back to local case id if backend generate unavailable
+          caseId = activeCase.recommendationId;
+        }
+
+        if (caseId && caseId !== 'NO_SAFE_RECOMMENDATION') {
+          await assureApiClient.approveRecommendation(
+            caseId,
+            'Senior Production Engineer (ONGC / Baghewala Asset)'
+          );
+        } else if (caseId?.startsWith('ABSTAIN')) {
+          console.warn('[RecommendationView] Backend returned NO_SAFE_RECOMMENDATION — cannot approve.');
+        }
       } catch (err) {
-        console.warn('Backend approval sync notice:', err);
+        console.warn('[RecommendationView] Backend approval sync notice:', err);
       }
 
       // 2. Update local AssureTwinManager state
@@ -128,6 +149,7 @@ export class RecommendationView {
       }
     });
   }
+
 
   public update(_solutionState: SolutionState, activeCase: RecommendationCase | null): void {
     if (activeCase) {

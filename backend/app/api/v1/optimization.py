@@ -24,7 +24,7 @@ srp_controller = SRPPhysicsController()
 vfd_shaper = VFDStrokeShaper()
 inflow_governor = InflowLimitedGovernor()
 
-@router.post("/solve", response_model=OptimizationResponse)
+@router.post("/solve")
 def solve_optimization(req: OptimizationRequest) -> Dict[str, Any]:
     sim = get_sim_engine()
     state = sim.step(0.0)

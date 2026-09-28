@@ -125,26 +125,42 @@ def test_joint_optimization(client):
     assert opt_res.status_code == 200
     opt_data = opt_res.json()
     assert "best_candidate" in opt_data
-    assert len(opt_data["candidates"]) >= 3
-    assert opt_data["best_candidate"]["overall_score"] > 0
+    # C3 fix: candidates are now simulated; check real computed fields exist
+    assert "candidates" in opt_data
+    best = opt_data["best_candidate"]
+    assert "spm" in best
+    assert "stroke_in" in best
+    assert "float_margin_pct" in best
+    assert "sor" in best
+    assert "overall_score" in best
+    assert "solver_rationale" in opt_data
+    assert "all_evaluated" in opt_data  # New field confirming grid search ran
 
 def test_recommendation_and_approval(client):
-    # List recommendations
-    rec_res = client.get("/api/v1/recommendations")
-    assert rec_res.status_code == 200
-    recs = rec_res.json()
-    assert len(recs) >= 1
-    case_id = recs[0]["case_id"]
+    # C1 fix: Generate a fresh recommendation from twin state (not hardcoded default)
+    gen_res = client.post("/api/v1/recommendations/generate")
+    assert gen_res.status_code == 200
+    rec_data = gen_res.json()
+    # Must have a real case_id (not hardcoded REC-2026-BGW-004)
+    assert "case_id" in rec_data
+    assert rec_data["case_id"] != "REC-2026-BGW-004"
+    assert "recommendation_type" in rec_data  # New field: SAFE_RECOMMENDATION or ABSTAIN
+    case_id = rec_data["case_id"]
 
-    # Approve recommendation
-    app_res = client.post(f"/api/v1/recommendations/{case_id}/approve", json={
-        "actor": "Lead Asset Petroleum Engineer",
-        "notes": "Verified thermal window safety margin."
-    })
-    assert app_res.status_code == 200
-    app_data = app_res.json()
-    assert app_data["status"] == "APPROVED_BY_ENGINEER"
-    assert app_data["approved_by"] == "Lead Asset Petroleum Engineer"
+    if rec_data["recommendation_type"] == "ABSTAIN":
+        # Valid: gate or rehearsal abstained — verify abstain structure
+        assert rec_data["status"] == "NO_SAFE_RECOMMENDATION"
+        assert len(rec_data.get("blocking_reasons", [])) > 0
+    else:
+        # Safe recommendation: verify it can be approved
+        app_res = client.post(f"/api/v1/recommendations/{case_id}/approve", json={
+            "actor": "Lead Asset Petroleum Engineer",
+            "notes": "Verified thermal window safety margin."
+        })
+        assert app_res.status_code == 200
+        app_data = app_res.json()
+        assert app_data["status"] == "APPROVED_BY_ENGINEER"
+        assert app_data["approved_by"] == "Lead Asset Petroleum Engineer"
 
 def test_assurance_12_checkpoints(client):
     response = client.get("/api/v1/assurance/evaluate")
@@ -152,7 +168,22 @@ def test_assurance_12_checkpoints(client):
     data = response.json()
     assert len(data["checks"]) == 12
     assert "gate_score_pct" in data
-    assert data["gate_score_pct"] >= 75.0
+    assert 0.0 <= data["gate_score_pct"] <= 100.0  # Real range, not asserting fake >=75
+    # C2 fix: gate now returns real verdicts; verify structure
+    assert "abstain_active" in data
+    assert "blocking_reasons" in data
+    assert "status" in data
+    assert data["status"] in [
+        "VERIFIED FOR ENGINEER REVIEW",
+        "CONDITIONAL \u2014 REVIEW WARNINGS",
+        "NO SAFE RECOMMENDATION (ABSTAIN)"
+    ]
+    # All 12 checks must have required fields
+    for check in data["checks"]:
+        assert "id" in check
+        assert "passed" in check
+        assert "status" in check
+        assert check["status"] in ["PASS", "WARNING", "FAIL"]
 
 def test_alerts(client):
     response = client.get("/api/v1/alerts")

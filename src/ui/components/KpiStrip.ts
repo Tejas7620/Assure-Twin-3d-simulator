@@ -29,13 +29,18 @@ export class KpiStrip {
             <span class="ws-kpi-label">OIL PRODUCTION</span>
           </div>
           <div class="ws-kpi-body">
-            <div class="ws-kpi-icon gold">
-              <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon gold">
+                <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-oil-rate">18.6</span> <span class="ws-kpi-unit">BOPD</span></div>
+                <div class="ws-kpi-trend up"><span class="ws-trend-arrow">▲</span> 4.1% vs yesterday</div>
+              </div>
             </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-oil-rate">32.6</span> <span class="ws-kpi-unit">BOPD</span></div>
-              <div class="ws-kpi-trend up"><span class="ws-trend-arrow">↗</span> 4.3 vs yesterday</div>
-            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 18 Q 15 12, 25 15 T 45 8 T 60 4" fill="none" stroke="#10b981" stroke-width="2"/>
+            </svg>
           </div>
         </div>
 
@@ -45,13 +50,18 @@ export class KpiStrip {
             <span class="ws-kpi-label">WATER CUT</span>
           </div>
           <div class="ws-kpi-body">
-            <div class="ws-kpi-icon blue">
-              <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="M12 18a4 4 0 0 0 4-4"/></svg>
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon blue">
+                <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="M12 18a4 4 0 0 0 4-4"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-water-cut">12.8</span> <span class="ws-kpi-unit">%</span></div>
+                <div class="ws-kpi-trend up"><span class="ws-trend-arrow">▲</span> 1.2%</div>
+              </div>
             </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-water-cut">12.8</span> <span class="ws-kpi-unit">%</span></div>
-              <div class="ws-kpi-trend up"><span class="ws-trend-arrow">↗</span> 1.2 %</div>
-            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 20 Q 20 14, 35 16 T 60 6" fill="none" stroke="#38bdf8" stroke-width="2"/>
+            </svg>
           </div>
         </div>
 
@@ -61,45 +71,60 @@ export class KpiStrip {
             <span class="ws-kpi-label">LIQUID RATE</span>
           </div>
           <div class="ws-kpi-body">
-            <div class="ws-kpi-icon purple">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon purple">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-liquid-rate">23.1</span> <span class="ws-kpi-unit">BPD</span></div>
+                <div class="ws-kpi-trend up"><span class="ws-trend-arrow">▲</span> 3.6%</div>
+              </div>
             </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-liquid-rate">7.1</span> <span class="ws-kpi-unit">BPD</span></div>
-              <div class="ws-kpi-trend up"><span class="ws-trend-arrow">↗</span> 0.6</div>
-            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 18 Q 18 10, 32 14 T 60 5" fill="none" stroke="#a855f7" stroke-width="2"/>
+            </svg>
           </div>
         </div>
 
-        <!-- 4. STEAM RATE -->
+        <!-- 4. SOR -->
+        <div class="ws-kpi-card" id="kpi-sor">
+          <div class="ws-kpi-head">
+            <span class="ws-kpi-label">SOR</span>
+          </div>
+          <div class="ws-kpi-body">
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon cyan">
+                <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><line x1="16" y1="8" x2="8" y2="16"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-sor">6.4</span></div>
+                <div class="ws-kpi-trend down"><span class="ws-trend-arrow">▼</span> 2.1%</div>
+              </div>
+            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 6 Q 20 12, 35 14 T 60 20" fill="none" stroke="#06b6d4" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 5. STEAM RATE -->
         <div class="ws-kpi-card" id="kpi-steam">
           <div class="ws-kpi-head">
             <span class="ws-kpi-label">STEAM RATE</span>
           </div>
           <div class="ws-kpi-body">
-            <div class="ws-kpi-icon red">
-              <svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon red">
+                <svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-steam-rate">19.3</span> <span class="ws-kpi-unit">TPD</span></div>
+                <div class="ws-kpi-trend up"><span class="ws-trend-arrow">▲</span> 5.0%</div>
+              </div>
             </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-steam-rate">42.3</span> <span class="ws-kpi-unit">t/d</span></div>
-              <div class="ws-kpi-trend up"><span class="ws-trend-arrow">↗</span> 2.1</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. STEAM-OIL RATIO -->
-        <div class="ws-kpi-card" id="kpi-sor">
-          <div class="ws-kpi-head">
-            <span class="ws-kpi-label">STEAM-OIL RATIO</span>
-          </div>
-          <div class="ws-kpi-body">
-            <div class="ws-kpi-icon cyan">
-              <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><line x1="16" y1="8" x2="8" y2="16"/></svg>
-            </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-sor">6.2</span></div>
-              <div class="ws-kpi-trend down"><span class="ws-trend-arrow">↘</span> -0.4</div>
-            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 16 Q 15 8, 30 12 T 60 6" fill="none" stroke="#10b981" stroke-width="2"/>
+            </svg>
           </div>
         </div>
 
@@ -109,13 +134,18 @@ export class KpiStrip {
             <span class="ws-kpi-label">BOTTOMHOLE P</span>
           </div>
           <div class="ws-kpi-body">
-            <div class="ws-kpi-icon orange">
-              <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon orange">
+                <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-pwf">18.2</span> <span class="ws-kpi-unit">bar</span></div>
+                <div class="ws-kpi-trend up"><span class="ws-trend-arrow">▲</span> 2.8</div>
+              </div>
             </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-pwf">18.2</span> <span class="ws-kpi-unit">bar</span></div>
-              <div class="ws-kpi-trend up"><span class="ws-trend-arrow">↗</span> 0.8</div>
-            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 18 Q 18 15, 36 12 T 60 8" fill="none" stroke="#10b981" stroke-width="2"/>
+            </svg>
           </div>
         </div>
 
@@ -125,13 +155,18 @@ export class KpiStrip {
             <span class="ws-kpi-label">AVG TEMP (BH)</span>
           </div>
           <div class="ws-kpi-body">
-            <div class="ws-kpi-icon magenta">
-              <svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon magenta">
+                <svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-temp-bh">72.7</span> <span class="ws-kpi-unit">°C</span></div>
+                <div class="ws-kpi-trend down"><span class="ws-trend-arrow">▼</span> 1.7</div>
+              </div>
             </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-temp-bh">72.6</span> <span class="ws-kpi-unit">°C</span></div>
-              <div class="ws-kpi-trend up"><span class="ws-trend-arrow">↗</span> 1.3 °C</div>
-            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 6 Q 22 10, 38 14 T 60 20" fill="none" stroke="#ef4444" stroke-width="2"/>
+            </svg>
           </div>
         </div>
 
@@ -141,13 +176,18 @@ export class KpiStrip {
             <span class="ws-kpi-label">VISCOSITY (BH)</span>
           </div>
           <div class="ws-kpi-body">
-            <div class="ws-kpi-icon yellow">
-              <svg viewBox="0 0 24 24"><path d="M10 2v7.31L4.35 19.46A2 2 0 0 0 6.08 22h11.84a2 2 0 0 0 1.73-2.54L14 9.31V2"/></svg>
+            <div class="ws-kpi-left">
+              <div class="ws-kpi-icon yellow">
+                <svg viewBox="0 0 24 24"><path d="M10 2v7.31L4.35 19.46A2 2 0 0 0 6.08 22h11.84a2 2 0 0 0 1.73-2.54L14 9.31V2"/></svg>
+              </div>
+              <div class="ws-kpi-val-group">
+                <div class="ws-kpi-val"><span id="val-visc-bh">1,392</span> <span class="ws-kpi-unit">cP</span></div>
+                <div class="ws-kpi-trend down"><span class="ws-trend-arrow">▼</span> 98</div>
+              </div>
             </div>
-            <div class="ws-kpi-val-group">
-              <div class="ws-kpi-val"><span id="val-visc-bh">1,392</span> <span class="ws-kpi-unit">cP</span></div>
-              <div class="ws-kpi-trend up"><span class="ws-trend-arrow">↗</span> 98</div>
-            </div>
+            <svg class="ws-kpi-sparkline" viewBox="0 0 60 24">
+              <path d="M 0 8 Q 20 12, 40 16 T 60 21" fill="none" stroke="#10b981" stroke-width="2"/>
+            </svg>
           </div>
         </div>
       </section>

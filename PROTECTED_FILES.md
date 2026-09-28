@@ -62,3 +62,23 @@
 - All ASSURE-TWIN intelligence components (Virtual Downhole Sensors, Thermo-Mechanical Operating Envelope, Pumpability Window, Thermal Reserve, Future Trajectory, Decision Rehearsal, Robustness Engine, Assurance Gate, Recommendation Contract, Recalibration, Audit Trail) are housed under the dedicated additive directory:
   `src/assure/`
 - Integration is performed non-destructively through the read-only `SimulationStateAdapter` and an unobtrusive overlay Decision Center UI.
+
+---
+
+## Audit Clarifications (added 2026-09-28 — Phase 0/1 audit)
+
+These clarifications resolve ambiguities found during the read-only audit. They **add** boundaries; they do not relax any existing protection above.
+
+### A. `src/assure/*` is MODIFIABLE (the intended integration surface)
+The 33-file client intelligence suite under `src/assure/*` (e.g. `AssureTwinManager.ts`, `StateEstimator.ts`, `AssuranceEngine.ts`, `RecommendationContract.ts`, `MLPredictionProvider.ts`, `ui/DecisionCenter.ts`) is the **additive ASSURE-TWIN layer** referenced in the Operational Directive above. It is **NOT protected** and is the primary frontend work area. It consumes protected state read-only via `SimulationStateAdapter` — that read-only contract must be preserved, but the intelligence code itself may be edited.
+
+### B. Active backend `backend/app/*` is MODIFIABLE (primary work area)
+The READ-ONLY BASELINE backend list in §4 refers to the **legacy top-level** files `backend/engine.py`, `backend/thermal.py`, `backend/viscosity.py`, `backend/inflow.py`, `backend/pump.py`, `backend/srp.py`, `backend/production.py`, `backend/economics.py`, `backend/main.py`. These are **distinct** from the active FastAPI package under `backend/app/*` (twin, physics, ai, optimization, assurance, analytics, forecast, api, models, schemas, seed, config), which **is** the primary backend implementation area and may be modified per `IMPLEMENTATION_PLAN.md`.
+
+### C. Protected files confirmed untouched by the audit
+`src/scene/*`, `src/kinematics/PumpjackKinematics.ts`, `src/textures/*`, `src/sim/SimulationClient.ts`, `src/ui/DynoCard.ts`, `src/ui/ControlPanel.ts`, and the legacy `backend/*.py` baseline were inspected read-only and **not modified**.
+
+### D. Rule for future fixes
+If any planned fix appears to require editing a protected file, **stop** and find a non-destructive seam (adapter/bridge/subclass). The backend-prefer integration bridge (see `INTEGRATION_MAP.md` §4) lives in `AssureTwinManager` — **never** inside `SimulationClient.ts`.
+
+> See `PROJECT_AUDIT.md` §9 for the full protected-asset confirmation.

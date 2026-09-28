@@ -62,10 +62,10 @@ export class PumpabilityGauge {
     ctx.lineCap = 'round';
     ctx.stroke();
 
-    // Needle or indicator position based on days (0 to 14 days)
-    const clampedDays = Math.max(0, Math.min(14, days));
-    // 14 days = left (Math.PI), 0 days = right (0)
-    const progress = 1.0 - (clampedDays / 14.0); // 0 (14d) to 1 (0d)
+    // Needle or indicator position based on days (0 to 30 days)
+    const clampedDays = Math.max(0, Math.min(30, days));
+    // 30 days = left (Math.PI), 0 days = right (0)
+    const progress = 1.0 - (clampedDays / 30.0); // 0 (30d) to 1 (0d)
     const needleAngle = Math.PI - progress * Math.PI;
 
     // Small tick marks

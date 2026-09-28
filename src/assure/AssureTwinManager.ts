@@ -190,15 +190,21 @@ export class AssureTwinManager {
   public reconcileSimulatedOutcome(): OutcomeRecord | null {
     if (!this._activeRecommendationCase) return null;
 
-    // Simulate post-action observation with slight realistic error deviation
+    // C6 fix (§107): Use the ACTUAL live simulation state as the observed outcome.
+    // Do NOT fabricate oil_rate_bopd from expected outcomes ± Math.random() — that made
+    // every recommendation self-fulfilling and violated §107 (no random for engineering quantities).
+    // The real observed state is already available from SimulationClient; use it directly.
     const observedState = JSON.parse(JSON.stringify(this._simClient.state)) as SimulationState;
-    observedState.production.oil_rate_bopd = this._activeRecommendationCase.expectedOutcomes.oilRateBopd * (0.94 + Math.random() * 0.08);
+    // observedState.production.oil_rate_bopd is the actual value from the live physics engine.
+    // No synthetic noise is applied here. If the backend is offline, the local physics fallback
+    // in SimulationClient provides a physics-derived value — still no Math.random().
 
     this._lastOutcomeRecord = OutcomeReconciliationEngine.reconcile(this._activeRecommendationCase, observedState);
     this._activeRecommendationCase.approvalStatus = 'RECONCILED';
     this.notify();
     return this._lastOutcomeRecord;
   }
+
 
   public applyRecalibrationParameter(key: string): boolean {
     const success = RecalibrationEngine.approveParameter(key);

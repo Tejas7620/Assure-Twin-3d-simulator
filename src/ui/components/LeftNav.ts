@@ -9,6 +9,7 @@ export type PageId =
   | 'simulator'
   | 'wellstate'
   | 'forecast'
+  | 'pumpability'
   | 'scenarios'
   | 'optimization'
   | 'recommendation'
@@ -16,6 +17,7 @@ export type PageId =
   | 'alerts'
   | 'history'
   | 'calibration'
+  | 'reports'
   | 'settings';
 
 export interface LeftNavCallbacks {
@@ -71,7 +73,12 @@ export class LeftNav {
             <span>Forecast</span>
           </button>
 
-          <button class="ws-nav-item" data-page="scenarios" title="4 Counterfactuals & Custom Rehearsal">
+          <button class="ws-nav-item" data-page="pumpability" title="Predictive Pumpability Window">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+            <span>Pumpability</span>
+          </button>
+
+          <button class="ws-nav-item" data-page="scenarios" title="Decision Rehearsal Workspace">
             <svg viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
             <span>Scenarios</span>
           </button>
@@ -106,25 +113,37 @@ export class LeftNav {
             <span>Calibration</span>
           </button>
 
+          <button class="ws-nav-item" data-page="reports" title="Certified Engineering Decision Reports">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>Reports</span>
+          </button>
+
           <button class="ws-nav-item" data-page="settings" title="System Settings & Units">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Settings</span>
           </button>
         </div>
 
-        <!-- BOTTOM WELL STATUS WIDGET -->
+        <!-- BOTTOM WIDGETS: WELL STATUS & DATA PROVENANCE (MATCHING REFERENCE IMAGE) -->
         <div class="ws-nav-footer">
           <div class="ws-status-card" id="nav-well-status-card">
             <div class="ws-status-head">
               <span class="ws-status-lbl">WELL STATUS</span>
+              <span class="ws-status-info-icon" title="Current overall cyber-physical system health">?</span>
             </div>
             <div class="ws-status-main">
               <div class="ws-status-badge-text" id="nav-well-status-text">NORMAL</div>
-              <div class="ws-status-sub">Operating within safe window</div>
+              <div class="ws-status-sub" id="nav-well-status-sub">Operating within safe window</div>
             </div>
-            <div class="ws-status-shield">
-              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-            </div>
+          </div>
+
+          <div class="ws-provenance-legend">
+            <div class="ws-prov-header">DATA PROVENANCE</div>
+            <div class="ws-prov-row"><span class="ws-prov-dot cyan"></span> Measured</div>
+            <div class="ws-prov-row"><span class="ws-prov-dot yellow"></span> Calibrated</div>
+            <div class="ws-prov-row"><span class="ws-prov-dot orange"></span> Model-Derived</div>
+            <div class="ws-prov-row"><span class="ws-prov-dot blue"></span> Predicted</div>
+            <div class="ws-prov-row"><span class="ws-prov-dot white"></span> Synthetic / Demo</div>
           </div>
         </div>
       </nav>
