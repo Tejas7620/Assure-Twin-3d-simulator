@@ -7,7 +7,7 @@ Generates, deduplicates, and manages active alerts across 3 severity levels:
 """
 
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 class AlertEngine:
     def __init__(self):
@@ -35,7 +35,7 @@ class AlertEngine:
                 "title": "Severe Sucker Rod Float Detected",
                 "message": f"Float margin collapsed to {fm:.1f}%. Polished rod is descending slower than carrier bar. Imminent buckling and tubing rupture risk.",
                 "action": "Immediately reduce SPM or engage VFD slow downstroke shaping.",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
 
         # 2. WARNING: Reduced Float Margin
@@ -46,7 +46,7 @@ class AlertEngine:
                 "title": "Rod Float Margin Restricted",
                 "message": f"Float margin is {fm:.1f}% (below 18% target). Viscous drag in upper tubing is retarding rod string descent.",
                 "action": "Monitor downstroke velocity and prepare speed throttling.",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
 
         # 3. CRITICAL / WARNING: Fluid Pound Shock
@@ -57,7 +57,7 @@ class AlertEngine:
                 "title": "Severe Fluid Pound / Pump-Off Condition",
                 "message": f"Pump fillage is {fillage*100:.1f}%. Plunger slamming into liquid level on downstroke.",
                 "action": "Throttle pumping speed to match reservoir inflow rate.",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
         elif fillage < 0.78:
             current_alerts.append({
@@ -66,7 +66,7 @@ class AlertEngine:
                 "title": "Low Pump Fillage Detected",
                 "message": f"Pump fillage is {fillage*100:.1f}%. Mild fluid pound shock waves observed on pump card.",
                 "action": "Observe inflow trend or optimize SPM.",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
 
         # 4. WARNING: High PPRL Tensile Load
@@ -77,7 +77,7 @@ class AlertEngine:
                 "title": "Peak Polished Rod Load Near Allowable Limit",
                 "message": f"PPRL is {pprl:.1f} kN (exceeds 85% of API Grade D rod yield).",
                 "action": "Verify counterbalance adjustment and evaluate stroke length.",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
 
         # 5. INFO: CSS Phase Transition Milestone
@@ -88,7 +88,7 @@ class AlertEngine:
                 "title": f"CSS Cycle in {css_phase} Phase",
                 "message": f"Well operating in {css_phase} mode at {temp:.1f}°C near-wellbore temperature.",
                 "action": "Review phase duration against thermodynamic schedule.",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
 
         # Update active alert cache

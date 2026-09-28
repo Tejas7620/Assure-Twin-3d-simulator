@@ -10,13 +10,16 @@ from sqlalchemy import (
     Column, String, Float, Integer, Boolean, DateTime, ForeignKey, Text, JSON
 )
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 from ..database import Base
 
 def gen_uuid() -> str:
     return str(uuid.uuid4())
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 class Field(Base):
     __tablename__ = "fields"
@@ -25,8 +28,8 @@ class Field(Base):
     name = Column(String, unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
     location = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     wells = relationship("Well", back_populates="field", cascade="all, delete-orphan")
 
@@ -47,8 +50,8 @@ class Well(Base):
     longitude = Column(Float, nullable=True)
     completion_type = Column(String, default="Slotted Liner in Horizontal Drainhole")
     pump_type = Column(String, default="API Insert Plunger Pump (1.75 in)")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     field = relationship("Field", back_populates="wells")
     css_cycles = relationship("CSSCycle", back_populates="well", cascade="all, delete-orphan")
@@ -71,8 +74,8 @@ class Reservoir(Base):
     porosity = Column(Float, default=0.224) # 22.4%
     permeability = Column(Float, default=1250.0) # 1,250 mD
     oil_saturation = Column(Float, default=0.68) # 68%
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class Completion(Base):
@@ -84,7 +87,7 @@ class Completion(Base):
     tubing_od = Column(Float, default=2.875) # inches
     perforation_top = Column(Float, default=1410.0)
     perforation_bottom = Column(Float, default=1840.0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 
 class FluidProperty(Base):
@@ -98,7 +101,7 @@ class FluidProperty(Base):
     water_cut = Column(Float, default=0.128) # 12.8%
     density = Column(Float, default=992.0) # kg/m3
     asphaltene_content = Column(Float, default=14.5) # wt%
-    valid_from = Column(DateTime, default=datetime.utcnow)
+    valid_from = Column(DateTime, default=utc_now)
     valid_to = Column(DateTime, nullable=True)
 
 
@@ -115,7 +118,7 @@ class CSSCycle(Base):
     injection_duration = Column(Float, default=14.0) # days
     soak_duration = Column(Float, default=7.0) # days
     production_cutoff = Column(Float, default=60.0) # days
-    start_time = Column(DateTime, default=datetime.utcnow)
+    start_time = Column(DateTime, default=utc_now)
     injection_end = Column(DateTime, nullable=True)
     soak_end = Column(DateTime, nullable=True)
     production_start = Column(DateTime, nullable=True)
@@ -150,7 +153,7 @@ class SRPOperatingState(Base):
 
     id = Column(String, primary_key=True, default=gen_uuid)
     well_id = Column(String, ForeignKey("wells.id"), nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=utc_now, index=True)
     spm = Column(Float, default=3.2)
     stroke_length = Column(Float, default=64.0)
     vfd = Column(Float, default=62.0)
@@ -167,7 +170,7 @@ class ProductionObservation(Base):
 
     id = Column(String, primary_key=True, default=gen_uuid)
     well_id = Column(String, ForeignKey("wells.id"), nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=utc_now, index=True)
     oil_rate = Column(Float, default=32.6) # BOPD
     liquid_rate = Column(Float, default=37.4) # BPD
     water_cut = Column(Float, default=0.128) # 12.8%
@@ -187,7 +190,7 @@ class SensorObservation(Base):
 
     id = Column(String, primary_key=True, default=gen_uuid)
     well_id = Column(String, ForeignKey("wells.id"), nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=utc_now, index=True)
     sensor_type = Column(String, nullable=False) # e.g. WHP, WHT, FLUID_LEVEL, MOTOR_CURRENT
     value = Column(Float, nullable=False)
     unit = Column(String, nullable=False)
@@ -204,14 +207,14 @@ class SimulationRun(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     well_id = Column(String, ForeignKey("wells.id"), nullable=False)
     scenario_id = Column(String, nullable=True)
-    start_time = Column(DateTime, default=datetime.utcnow)
+    start_time = Column(DateTime, default=utc_now)
     end_time = Column(DateTime, nullable=True)
     simulation_time = Column(Float, default=41.2) # days
     simulation_speed = Column(Float, default=1.0)
     status = Column(String, default="RUNNING") # RUNNING, PAUSED, COMPLETED
     parameters_json = Column(JSON, nullable=True)
     results_json = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 
 class Scenario(Base):
@@ -224,7 +227,7 @@ class Scenario(Base):
     description = Column(Text, nullable=True)
     base_run_id = Column(String, nullable=True)
     control_parameters = Column(JSON, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     results = relationship("ScenarioResult", back_populates="scenario", cascade="all, delete-orphan")
 
@@ -234,7 +237,7 @@ class ScenarioResult(Base):
 
     id = Column(String, primary_key=True, default=gen_uuid)
     scenario_id = Column(String, ForeignKey("scenarios.id"), nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=utc_now)
     oil_rate = Column(Float, nullable=False)
     sor = Column(Float, nullable=False)
     energy = Column(Float, nullable=False)
@@ -259,7 +262,7 @@ class ForecastRun(Base):
     horizon_days = Column(Integer, default=14)
     model_version = Column(String, default="MarxLangenheim-v2.1")
     status = Column(String, default="COMPLETED")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     points = relationship("ForecastPoint", back_populates="forecast_run", cascade="all, delete-orphan")
 
@@ -292,7 +295,7 @@ class OptimizationRun(Base):
     objective_weights = Column(JSON, nullable=False) # {oil: 1.0, steam: 0.45, risk: 0.85}
     constraints = Column(JSON, nullable=False)
     status = Column(String, default="COMPLETED")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     completed_at = Column(DateTime, nullable=True)
 
     candidates = relationship("OptimizationCandidate", back_populates="optimization_run", cascade="all, delete-orphan")
@@ -345,7 +348,7 @@ class Recommendation(Base):
     model_agreement = Column(String, default="AGREEMENT")
     ood_status = Column(String, default="LOW")
     provenance_summary = Column(String, default="PHYSICS_CALIBRATED")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     approved_at = Column(DateTime, nullable=True)
     rejected_at = Column(DateTime, nullable=True)
 
@@ -360,7 +363,7 @@ class RecommendationEvent(Base):
     recommendation_id = Column(String, ForeignKey("recommendations.id"), nullable=False)
     event_type = Column(String, nullable=False) # CREATED, SIMULATED, VERIFIED, APPROVED, REJECTED, DATA_REQUESTED, APPLIED, RECONCILED
     actor = Column(String, default="Senior Production Engineer (ONGC / Baghewala Asset)")
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=utc_now)
     comment = Column(Text, nullable=True)
     metadata_json = Column(JSON, nullable=True)
 
@@ -379,7 +382,7 @@ class Alert(Base):
     value = Column(Float, nullable=True)
     threshold = Column(Float, nullable=True)
     status = Column(String, default="ACTIVE") # ACTIVE, ACKNOWLEDGED, RESOLVED
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=utc_now, index=True)
     acknowledged_at = Column(DateTime, nullable=True)
     resolved_at = Column(DateTime, nullable=True)
     metadata_json = Column(JSON, nullable=True)
@@ -397,7 +400,7 @@ class CalibrationRun(Base):
     status = Column(String, default="APPROVED")
     error_before = Column(Float, default=0.284)
     error_after = Column(Float, default=0.048)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     approved_at = Column(DateTime, nullable=True)
 
     parameters = relationship("CalibrationParameter", back_populates="calibration_run", cascade="all, delete-orphan")
@@ -427,7 +430,7 @@ class ModelVersion(Base):
     description = Column(Text, nullable=True)
     artifact_reference = Column(String, nullable=True)
     active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 
 class ProvenanceRecord(Base):
@@ -439,7 +442,7 @@ class ProvenanceRecord(Base):
     field_name = Column(String, nullable=False)
     source_type = Column(String, nullable=False) # MEASURED, PUBLIC, CALIBRATED, ASSUMED, SYNTHETIC, PREDICTED, MODEL_DERIVED, DEMO
     source_reference = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 
 class AuditEvent(Base):
@@ -450,5 +453,5 @@ class AuditEvent(Base):
     action = Column(String, nullable=False)
     entity_type = Column(String, nullable=False)
     entity_id = Column(String, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=utc_now, index=True)
     details = Column(JSON, nullable=True)

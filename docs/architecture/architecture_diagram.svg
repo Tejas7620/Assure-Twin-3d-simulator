@@ -1,0 +1,313 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="100%" height="100%" style="background:#ffffff; font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Drop shadows -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <filter id="subtle-shadow" x="-2%" y="-2%" width="104%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.05"/>
+    </filter>
+
+    <!-- Gradients -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+    <linearGradient id="boxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+    <linearGradient id="storageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+
+    <!-- Arrow Marker -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0f172a" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <!-- ========================================== -->
+  <!-- 1. TOP: EXTERNAL SYSTEMS & USERS           -->
+  <!-- ========================================== -->
+  <g transform="translate(60, 25)">
+    <!-- Container -->
+    <rect x="0" y="0" width="1080" height="95" rx="16" fill="#f8fafc" stroke="#0f172a" stroke-width="1.8" filter="url(#shadow)"/>
+    
+    <!-- Title -->
+    <text x="540" y="24" text-anchor="middle" fill="#0369a1" font-size="16" font-weight="700" letter-spacing="0.5">
+      👥 External Systems &amp; Users
+    </text>
+
+    <!-- 4 Sub-Boxes -->
+    <g transform="translate(20, 36)">
+      <!-- Pill 1 -->
+      <rect x="0" y="0" width="240" height="46" rx="23" fill="#ffffff" stroke="#0f172a" stroke-width="1.4" filter="url(#subtle-shadow)"/>
+      <text x="120" y="22" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">Engineers</text>
+      <text x="120" y="37" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">(Production &amp; Reservoir)</text>
+
+      <!-- Pill 2 -->
+      <rect x="260" y="0" width="240" height="46" rx="23" fill="#ffffff" stroke="#0f172a" stroke-width="1.4" filter="url(#subtle-shadow)"/>
+      <text x="380" y="28" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">Operators &amp; Admins</text>
+
+      <!-- Pill 3 -->
+      <rect x="520" y="0" width="250" height="46" rx="23" fill="#ffffff" stroke="#0f172a" stroke-width="1.4" filter="url(#subtle-shadow)"/>
+      <text x="645" y="22" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">SCADA / Historian</text>
+      <text x="645" y="37" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">(Live Telemetry)</text>
+
+      <!-- Pill 4 -->
+      <rect x="790" y="0" width="250" height="46" rx="23" fill="#ffffff" stroke="#0f172a" stroke-width="1.4" filter="url(#subtle-shadow)"/>
+      <text x="915" y="22" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">Physics Simulator</text>
+      <text x="915" y="37" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">(Live Stream)</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- 2. MAIN CORE DIGITAL TWIN (DASHED BOX)     -->
+  <!-- ========================================== -->
+  <g transform="translate(60, 140)">
+    <!-- Outer Dashed Boundary -->
+    <rect x="0" y="0" width="1080" height="605" rx="18" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" stroke-dasharray="8 6"/>
+
+    <!-- ---------------------------------------- -->
+    <!-- 2A. PHYSICS & ML CORE (PER-WELL TWIN)    -->
+    <!-- ---------------------------------------- -->
+    <g transform="translate(15, 15)">
+      <rect x="0" y="0" width="1050" height="155" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.6" filter="url(#subtle-shadow)"/>
+      
+      <!-- Section Title -->
+      <text x="525" y="25" text-anchor="middle" fill="#0369a1" font-size="17" font-weight="700" letter-spacing="0.4">
+        Physics &amp; ML Core (Per-Well Twin)
+      </text>
+
+      <!-- 5 Sub-blocks -->
+      <g transform="translate(18, 38)">
+        <!-- Core 1 -->
+        <rect x="0" y="0" width="190" height="98" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="95" y="38" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Reservoir &amp;</text>
+        <text x="95" y="58" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Thermal Model</text>
+        <text x="95" y="80" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">Marx-Langenheim / Steam</text>
+
+        <!-- Core 2 -->
+        <rect x="206" y="0" width="190" height="98" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="301" y="32" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Rheology</text>
+        <text x="301" y="50" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Engine</text>
+        <text x="301" y="70" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="600">(Andrade → Gel)</text>
+        <text x="301" y="84" text-anchor="middle" fill="#64748b" font-size="9.5">Non-Newtonian μ(T)</text>
+
+        <!-- Core 3 -->
+        <rect x="412" y="0" width="190" height="98" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="507" y="35" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Wellbore &amp;</text>
+        <text x="507" y="55" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Rod Mechanics</text>
+        <text x="507" y="78" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">API RP 11L / Couette Drag</text>
+
+        <!-- Core 4 -->
+        <rect x="618" y="0" width="190" height="98" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="713" y="35" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Inflow /</text>
+        <text x="713" y="55" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Production Model</text>
+        <text x="713" y="78" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">Vogel / Darcy IPR / Fillage</text>
+
+        <!-- Core 5 -->
+        <rect x="824" y="0" width="190" height="98" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="919" y="35" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">ML Surrogate</text>
+        <text x="919" y="55" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">&amp; Hazard Model</text>
+        <text x="919" y="78" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">RF Ensemble + OOD Guard</text>
+      </g>
+    </g>
+
+    <!-- ---------------------------------------- -->
+    <!-- 2B. DATA & INTEGRATION                   -->
+    <!-- ---------------------------------------- -->
+    <g transform="translate(15, 195)">
+      <rect x="0" y="0" width="300" height="395" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.6" filter="url(#subtle-shadow)"/>
+      <text x="150" y="30" text-anchor="middle" fill="#0369a1" font-size="17" font-weight="700">Data &amp; Integration</text>
+
+      <!-- Protocol Adapters -->
+      <g transform="translate(20, 60)">
+        <rect x="0" y="0" width="260" height="90" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.4"/>
+        <text x="130" y="38" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Protocol Adapters</text>
+        <text x="130" y="60" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="600">(MQTT, OPC-UA)</text>
+        <text x="130" y="78" text-anchor="middle" fill="#64748b" font-size="10">FastAPI REST &amp; WebSockets</text>
+      </g>
+
+      <!-- Arrow down: Normalized Tags -->
+      <path d="M 150 156 L 150 220" stroke="#0f172a" stroke-width="1.6" marker-end="url(#arrow)"/>
+      <rect x="85" y="178" width="130" height="22" rx="4" fill="#ffffff"/>
+      <text x="150" y="194" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="600">Normalized Tags</text>
+
+      <!-- Data Quality & Virtual Sensors -->
+      <g transform="translate(20, 226)">
+        <rect x="0" y="0" width="260" height="140" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.4"/>
+        <text x="130" y="42" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Data Quality &amp; Virtual</text>
+        <text x="130" y="64" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Sensors</text>
+        <line x1="30" y1="80" x2="230" y2="80" stroke="#e2e8f0" stroke-width="1"/>
+        <text x="130" y="98" text-anchor="middle" fill="#475569" font-size="11">Virtual Downhole Temp &amp; PIP</text>
+        <text x="130" y="115" text-anchor="middle" fill="#475569" font-size="11">Couette Annular Drag Synthesis</text>
+        <text x="130" y="130" text-anchor="middle" fill="#0284c7" font-size="10" font-weight="600">Statistical Boundary Screening</text>
+      </g>
+    </g>
+
+    <!-- ---------------------------------------- -->
+    <!-- 2C. OPTIMIZATION & CONTROL               -->
+    <!-- ---------------------------------------- -->
+    <g transform="translate(340, 250)">
+      <rect x="0" y="0" width="345" height="340" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.6" filter="url(#subtle-shadow)"/>
+      <text x="172" y="30" text-anchor="middle" fill="#0369a1" font-size="17" font-weight="700">Optimization &amp; Control</text>
+
+      <!-- Box 1 -->
+      <g transform="translate(18, 52)">
+        <rect x="0" y="0" width="309" height="74" rx="12" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="154" y="32" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Real-Time SRP</text>
+        <text x="154" y="52" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Controller</text>
+        <text x="154" y="67" text-anchor="middle" fill="#64748b" font-size="9.5">VFD Stroke Shaping / Fluid Pound Guard</text>
+      </g>
+
+      <!-- Box 2 -->
+      <g transform="translate(18, 142)">
+        <rect x="0" y="0" width="309" height="78" rx="12" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="154" y="32" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">CSS + SRP Joint</text>
+        <text x="154" y="52" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Optimizer</text>
+        <text x="154" y="69" text-anchor="middle" fill="#0284c7" font-size="10" font-weight="600">SciPy Multi-Objective Pareto Frontier</text>
+      </g>
+
+      <!-- Box 3 -->
+      <g transform="translate(18, 235)">
+        <rect x="0" y="0" width="309" height="85" rx="12" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="154" y="28" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Rehearsal + Zero-Trust Gate</text>
+        <text x="154" y="47" text-anchor="middle" fill="#0f172a" font-size="12.5" font-weight="700">(12-Point Gatekeeper)</text>
+        <text x="154" y="65" text-anchor="middle" fill="#dc2626" font-size="10.5" font-weight="700">Abstain Protocol: "NO SAFE RECOMMENDATION"</text>
+        <text x="154" y="78" text-anchor="middle" fill="#64748b" font-size="9.5">21-Day Cloned Twin Rehearsal Trial</text>
+      </g>
+    </g>
+
+    <!-- ---------------------------------------- -->
+    <!-- 2D. FIELD ORCHESTRATION                  -->
+    <!-- ---------------------------------------- -->
+    <g transform="translate(710, 250)">
+      <rect x="0" y="0" width="345" height="340" rx="14" fill="#ffffff" stroke="#0f172a" stroke-width="1.6" filter="url(#subtle-shadow)"/>
+      <text x="172" y="30" text-anchor="middle" fill="#0369a1" font-size="17" font-weight="700">Field Orchestration</text>
+
+      <!-- Box 1 -->
+      <g transform="translate(18, 52)">
+        <rect x="0" y="0" width="309" height="74" rx="12" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="154" y="32" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Dynamic Operating Envelope</text>
+        <text x="154" y="52" text-anchor="middle" fill="#475569" font-size="12" font-weight="600">(Capacity &amp; Safe Boundaries)</text>
+        <text x="154" y="67" text-anchor="middle" fill="#64748b" font-size="9.5">Permissible SPM &amp; Stroke vs. Thermal Decay</text>
+      </g>
+
+      <!-- Box 2 -->
+      <g transform="translate(18, 142)">
+        <rect x="0" y="0" width="309" height="78" rx="12" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="154" y="32" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">Pumpability Window Forecaster</text>
+        <text x="154" y="52" text-anchor="middle" fill="#475569" font-size="12" font-weight="600">(Economic Cycle-Timing)</text>
+        <text x="154" y="69" text-anchor="middle" fill="#0284c7" font-size="10" font-weight="600">Days to 58°C Boundary / SOR ≤ 4.5</text>
+      </g>
+
+      <!-- Box 3 -->
+      <g transform="translate(18, 235)">
+        <rect x="0" y="0" width="309" height="85" rx="12" fill="#ffffff" stroke="#0f172a" stroke-width="1.3"/>
+        <text x="154" y="28" text-anchor="middle" fill="#0f172a" font-size="13.5" font-weight="700">Field Calibration &amp; Allocation</text>
+        <text x="154" y="47" text-anchor="middle" fill="#475569" font-size="12" font-weight="600">(History Match &amp; Reconciliation)</text>
+        <text x="154" y="65" text-anchor="middle" fill="#64748b" font-size="10">Andrade b-factor / Darcy k Tuning</text>
+        <text x="154" y="78" text-anchor="middle" fill="#0284c7" font-size="9.5" font-weight="600">Model Versioning &amp; Parameter Workbench</text>
+      </g>
+    </g>
+
+    <!-- ---------------------------------------- -->
+    <!-- INTER-BLOCK CONNECTORS (INSIDE TWIN)     -->
+    <!-- ---------------------------------------- -->
+    <!-- 1. Physics Core -> Optimization: "Well Risk & State Predicts" -->
+    <path d="M 510 170 L 510 248" stroke="#0f172a" stroke-width="1.6" marker-end="url(#arrow)"/>
+    <rect x="420" y="195" width="180" height="24" rx="4" fill="#ffffff"/>
+    <text x="510" y="212" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="600">Well Risk &amp; State Predicts</text>
+
+    <!-- 2. Field Orchestration -> Physics Core: "Simulates Setpoints" -->
+    <path d="M 880 248 L 880 172" stroke="#0f172a" stroke-width="1.6" marker-end="url(#arrow)"/>
+    <rect x="800" y="195" width="160" height="24" rx="4" fill="#ffffff"/>
+    <text x="880" y="212" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="600">Simulates Setpoints</text>
+
+    <!-- 3. Curved Arrow: Field Orchestration -> Optimization: "Steam/Operating Budgets" -->
+    <path d="M 710 320 C 692 300, 688 300, 685 320" stroke="#0f172a" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+    <text x="700" y="295" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="600">Steam / Energy Budgets</text>
+
+    <!-- 4. Curved Arrow: Optimization -> Field Orchestration: "Setpoints & Demand" -->
+    <path d="M 685 540 C 690 560, 705 560, 710 540" stroke="#0f172a" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+    <text x="700" y="582" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="600">Setpoints &amp; Demand</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- 3. LEFT FLOW: RAW & SENSOR DATA CURVES     -->
+  <!-- ========================================== -->
+  <!-- External -> Data & Integration: "Raw & Mock Telemetry" -->
+  <path d="M 58 75 C 10 75, 10 390, 70 390" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow-gray)"/>
+  <rect x="2" y="210" width="70" height="50" rx="4" fill="#ffffff"/>
+  <text x="37" y="228" text-anchor="middle" fill="#475569" font-size="11" font-weight="700">Raw &amp;</text>
+  <text x="37" y="243" text-anchor="middle" fill="#475569" font-size="11" font-weight="700">Stream</text>
+  <text x="37" y="258" text-anchor="middle" fill="#475569" font-size="10">Telemetry</text>
+
+  <!-- Data & Integration -> Data Storage: "Read & Writes Sensor Data" -->
+  <path d="M 70 590 C 10 590, 10 820, 58 820" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow-gray)"/>
+  <rect x="2" y="685" width="72" height="52" rx="4" fill="#ffffff"/>
+  <text x="38" y="703" text-anchor="middle" fill="#475569" font-size="11" font-weight="700">Read &amp;</text>
+  <text x="38" y="718" text-anchor="middle" fill="#475569" font-size="11" font-weight="700">Writes</text>
+  <text x="38" y="733" text-anchor="middle" fill="#475569" font-size="10">Sensors</text>
+
+  <!-- ========================================== -->
+  <!-- 4. BOTTOM: DATA STORAGE & WEB APP          -->
+  <!-- ========================================== -->
+  <!-- 4A. Data Storage -->
+  <g transform="translate(60, 765)">
+    <rect x="0" y="0" width="310" height="105" rx="16" fill="#f8fafc" stroke="#0f172a" stroke-width="1.8" filter="url(#shadow)"/>
+    <text x="155" y="25" text-anchor="middle" fill="#0369a1" font-size="16" font-weight="700">Data Storage</text>
+
+    <!-- Storage Card -->
+    <g transform="translate(18, 38)">
+      <rect x="0" y="0" width="274" height="52" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="1.3" filter="url(#subtle-shadow)"/>
+      <!-- Database cylinder icon -->
+      <g transform="translate(16, 12)">
+        <ellipse cx="14" cy="6" rx="12" ry="5" fill="#0284c7" />
+        <path d="M 2 6 L 2 22 C 2 25, 26 25, 26 22 L 26 6 Z" fill="#0369a1" />
+        <ellipse cx="14" cy="14" rx="12" ry="4" fill="#0284c7" opacity="0.6"/>
+        <ellipse cx="14" cy="22" rx="12" ry="4" fill="#38bdf8" opacity="0.8"/>
+      </g>
+      <text x="56" y="22" fill="#0f172a" font-size="12.5" font-weight="700">Database &amp; Audit Trail</text>
+      <text x="56" y="38" fill="#475569" font-size="11" font-weight="600">(SQLite 3 / PostgreSQL Ready)</text>
+    </g>
+  </g>
+
+  <!-- 4B. Web App -->
+  <g transform="translate(400, 765)">
+    <rect x="0" y="0" width="740" height="105" rx="16" fill="#f8fafc" stroke="#0f172a" stroke-width="1.8" filter="url(#shadow)"/>
+    <text x="370" y="25" text-anchor="middle" fill="#0369a1" font-size="16" font-weight="700">Web Application (Frontend Client)</text>
+
+    <!-- 3 Web App Pills -->
+    <g transform="translate(20, 38)">
+      <!-- Pill 1: 3D Twin Dashboard -->
+      <rect x="0" y="0" width="220" height="52" rx="26" fill="#ffffff" stroke="#0f172a" stroke-width="1.4" filter="url(#subtle-shadow)"/>
+      <text x="110" y="24" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">3D Twin Dashboard</text>
+      <text x="110" y="40" text-anchor="middle" fill="#64748b" font-size="10.5">Three.js WebGL / HUD</text>
+
+      <!-- Pill 2: Field Overview -->
+      <rect x="238" y="0" width="220" height="52" rx="26" fill="#ffffff" stroke="#0f172a" stroke-width="1.4" filter="url(#subtle-shadow)"/>
+      <text x="348" y="24" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">Field Overview</text>
+      <text x="348" y="40" text-anchor="middle" fill="#64748b" font-size="10.5">Fleet Telemetry &amp; Scenarios</text>
+
+      <!-- Pill 3: Assurance & Approval -->
+      <rect x="476" y="0" width="224" height="52" rx="26" fill="#ffffff" stroke="#0f172a" stroke-width="1.4" filter="url(#subtle-shadow)"/>
+      <text x="588" y="24" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">Assurance &amp; Approval</text>
+      <text x="588" y="40" text-anchor="middle" fill="#0369a1" font-size="10.5" font-weight="600">Zero-Trust Sign-off Hub</text>
+    </g>
+  </g>
+
+</svg>

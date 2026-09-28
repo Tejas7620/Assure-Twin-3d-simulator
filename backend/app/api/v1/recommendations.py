@@ -286,6 +286,14 @@ def generate_recommendation(
 
 @router.get("", response_model=List[Dict[str, Any]])
 def list_recommendations() -> List[Dict[str, Any]]:
+    if not _recommendations_store:
+        try:
+            active_well = twin_manager.get_active_well()
+            twin_state = active_well.step(0.0)
+            rec = _generate_recommendation(twin_state)
+            _recommendations_store[rec["case_id"]] = rec
+        except Exception:
+            pass
     return list(_recommendations_store.values())
 
 

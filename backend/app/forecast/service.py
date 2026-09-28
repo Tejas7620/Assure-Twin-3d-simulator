@@ -5,7 +5,7 @@ Forecasts CSS-SRP thermal decay, oil production rates, power consumption, and me
 """
 
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import math
 from backend.app.simulation.viscosity import calculate_viscosity
 
@@ -85,5 +85,5 @@ def generate_forecast(sim_state: Dict[str, Any], horizon_days: int = 30) -> Dict
         "well_id": "BGW-17A",
         "horizon_days": horizon_days,
         "points": points,
-        "generated_at": datetime.utcnow()
+        "generated_at": datetime.now(timezone.utc)
     }

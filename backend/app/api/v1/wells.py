@@ -7,7 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
+
+def _now():
+    return datetime.now(timezone.utc)
 
 from backend.app.database import get_db
 from backend.app.models.entities import Well, Field
@@ -33,7 +36,7 @@ def get_all_wells(db: Session = Depends(get_db)):
                 md=1840.0,
                 completion_type="Slotted Liner in Heavy Oil Sand",
                 pump_type="API Conventional SRP 320-256-100",
-                created_at=datetime.utcnow()
+                created_at=_now()
             )
         ]
     return wells
@@ -54,7 +57,7 @@ def get_well_by_id(well_id: str, db: Session = Depends(get_db)):
                 md=1840.0,
                 completion_type="Slotted Liner in Heavy Oil Sand",
                 pump_type="API Conventional SRP 320-256-100",
-                created_at=datetime.utcnow()
+                created_at=_now()
             )
         raise HTTPException(status_code=404, detail=f"Well {well_id} not found")
     return well
@@ -111,7 +114,7 @@ def get_well_operational_state(well_id: str):
     n = normalise(state)
     return {
         "well_id": well_id,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": _now().isoformat(),
         "mode": "DEMO SCENARIO" if _demo_overrides.get(well_id, {}).get("active") else "LIVE / SIMULATION",
         "normalised": n,
         "state": state
@@ -125,7 +128,7 @@ def get_well_operating_envelope(well_id: str):
     return {
         **envelope,
         "well_id": well_id,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": _now().isoformat(),
         "mode": "DEMO SCENARIO" if _demo_overrides.get(well_id, {}).get("active") else "SIMULATION",
         "provenance": "MODEL-DERIVED",
         "uncertainty": "LOW UNCERTAINTY (Analytically verified)"
@@ -139,7 +142,7 @@ def get_well_pumpability(well_id: str):
     return {
         **pumpability,
         "well_id": well_id,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": _now().isoformat(),
         "mode": "DEMO SCENARIO" if _demo_overrides.get(well_id, {}).get("active") else "SIMULATION",
         "model_version": "ML-Baghewala-v1.4",
         "confidence": "HIGH"
@@ -229,7 +232,7 @@ def trigger_demo_abnormal_viscosity(well_id: str):
         "temp_c": 51.5,
         "float_margin_pct": 5.2,
         "pprl_kn": 124.0,
-        "injected_at": datetime.utcnow().isoformat()
+        "injected_at": _now().isoformat()
     }
     state = _get_well_state_with_demo(well_id)
     from backend.app.assurance.gatekeeper import evaluate_assurance_gate

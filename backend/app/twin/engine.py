@@ -12,14 +12,16 @@ class TwinEngineManager:
     _instance: Optional["TwinEngineManager"] = None
 
     def __init__(self):
-        # Multi-well architecture: BW-01, BW-02, BW-03, BW-04
+        # Multi-well architecture: BGW-17A (primary Baghewala asset), BW-01, BW-02, BW-03, BW-04
+        primary_well = StatefulTwinEngine(well_id="BGW-17A")
         self.wells: Dict[str, StatefulTwinEngine] = {
-            "BW-01": StatefulTwinEngine(well_id="BW-01"),
+            "BGW-17A": primary_well,
+            "BW-01": primary_well,  # Alias to primary
             "BW-02": StatefulTwinEngine(well_id="BW-02"),
             "BW-03": StatefulTwinEngine(well_id="BW-03"),
             "BW-04": StatefulTwinEngine(well_id="BW-04")
         }
-        self.active_well_id = "BW-01"
+        self.active_well_id = "BGW-17A"
 
     @classmethod
     def get_instance(cls) -> "TwinEngineManager":
@@ -28,18 +30,27 @@ class TwinEngineManager:
         return cls._instance
 
     def get_active_well(self) -> StatefulTwinEngine:
-        return self.wells.get(self.active_well_id, self.wells["BW-01"])
+        return self.wells.get(self.active_well_id, self.wells.get("BGW-17A", list(self.wells.values())[0]))
+
+    def get_well(self, well_id: str) -> StatefulTwinEngine:
+        wid = (well_id or "").upper()
+        return self.wells.get(wid, self.get_active_well())
 
     def set_active_well(self, well_id: str) -> bool:
-        if well_id in self.wells:
-            self.active_well_id = well_id
+        wid = (well_id or "").upper()
+        if wid in self.wells:
+            self.active_well_id = wid
             return True
         return False
 
     def step_all(self, dt_real_sec: float):
+        # Step unique instances
+        seen = set()
         for well in self.wells.values():
-            if well.is_running:
-                well.step(dt_real_sec)
+            if id(well) not in seen:
+                seen.add(id(well))
+                if well.is_running:
+                    well.step(dt_real_sec)
 
     def get_active_state(self) -> Dict[str, Any]:
         return self.get_active_well().step(0.0)
