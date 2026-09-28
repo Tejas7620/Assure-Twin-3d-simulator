@@ -1,0 +1,58 @@
+"""
+backend/app/schemas/__init__.py
+Export domain schemas.
+"""
+
+from .domain import (
+    StatusResponse,
+    FieldResponse,
+    WellResponse,
+    ControlRequest,
+    SetControlsRequest,
+    VirtualSensorItem,
+    VirtualDownholeStateResponse,
+    PumpabilityResponse,
+    OperatingEnvelopeResponse,
+    ForecastPointSchema,
+    ForecastResponse,
+    ScenarioResultSchema,
+    ScenariosComparisonResponse,
+    CustomRehearsalRequest,
+    OptimizationWeights,
+    OptimizationRequest,
+    OptimizationCandidateSchema,
+    OptimizationResponse,
+    AssuranceGateCheckSchema,
+    AssuranceResponse,
+    RecommendationCaseResponse,
+    RecommendationActionRequest,
+    AlertSchema,
+    AuditEventSchema,
+)
+
+__all__ = [
+    "StatusResponse",
+    "FieldResponse",
+    "WellResponse",
+    "ControlRequest",
+    "SetControlsRequest",
+    "VirtualSensorItem",
+    "VirtualDownholeStateResponse",
+    "PumpabilityResponse",
+    "OperatingEnvelopeResponse",
+    "ForecastPointSchema",
+    "ForecastResponse",
+    "ScenarioResultSchema",
+    "ScenariosComparisonResponse",
+    "CustomRehearsalRequest",
+    "OptimizationWeights",
+    "OptimizationRequest",
+    "OptimizationCandidateSchema",
+    "OptimizationResponse",
+    "AssuranceGateCheckSchema",
+    "AssuranceResponse",
+    "RecommendationCaseResponse",
+    "RecommendationActionRequest",
+    "AlertSchema",
+    "AuditEventSchema",
+]
