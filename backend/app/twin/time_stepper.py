@@ -136,6 +136,10 @@ class StatefulTwinEngine:
                 self.economics.oil_price_usd_bbl = float(value)
             elif key == "steam_cost_usd_ton":
                 self.economics.steam_cost_usd_ton = float(value)
+            elif key in ["heater_power_kw", "heater_kw"]:
+                self.thermal.heater_power_w = float(value) * 1000.0
+            elif key == "heater_efficiency":
+                self.thermal.heater_efficiency = float(value)
         return ok
 
     def step(self, dt_real_sec: float) -> Dict[str, Any]:
@@ -149,10 +153,12 @@ class StatefulTwinEngine:
         dt_sim_days = dt_real_sec * 0.2 * self.time_scale
         self.sim_time_days += dt_sim_days
 
-        # Pumping controls from parameter registry
+        # Pumping and downhole heating controls from parameter registry
         spm = self.params.get_value("spm")
         stroke_in = self.params.get_value("stroke_inches")
         stroke_m = stroke_in * 0.0254
+        heater_power_kw = self.params.get_value("heater_power_kw", default=0.0)
+        heater_power_w = heater_power_kw * 1000.0
 
         # Crank rotation step: omega = 2 * pi * SPM / 60
         omega = (spm * 2.0 * math.pi) / 60.0
@@ -169,14 +175,15 @@ class StatefulTwinEngine:
             oil_rate_m3_d=self.production.cumulative_oil_m3 / max(1.0, self.sim_time_days)
         )
 
-        # 3. Thermal Model Step
+        # 3. Thermal Model Step (Coupled steam + electric downhole heater)
         steam_rate = self.params.get_value("steam_rate_t_d") if css_state["is_injecting"] else 0.0
         near_well_temp, r_heated = self.thermal.step(
             dt_days=dt_sim_days,
             steam_rate_t_d=steam_rate,
             is_injecting=css_state["is_injecting"],
             is_cooling=css_state["is_cooling"] or css_state["is_soaking"],
-            liquid_rate_m3_d=self._last_state.get("production", {}).get("liquid_rate_m3_d", 12.0)
+            liquid_rate_m3_d=self._last_state.get("production", {}).get("liquid_rate_m3_d", 12.0),
+            heater_power_w=heater_power_w
         )
 
         # 4. Fluid Viscosities in Heated and Cold Zones
@@ -239,13 +246,23 @@ class StatefulTwinEngine:
             tubing_profiles=tubing_profiles,
             rod_string=self.rod_string,
             rod_velocity_m_s=abs(kinematics["velocity_m_s"]),
-            is_upstroke=True
+            is_upstroke=True,
+            fluid_model=self.fluid
         )
         drag_down = self.drag.calculate_integrated_drag(
             tubing_profiles=tubing_profiles,
             rod_string=self.rod_string,
             rod_velocity_m_s=abs(kinematics["velocity_m_s"]),
-            is_upstroke=False
+            is_upstroke=False,
+            fluid_model=self.fluid
+        )
+
+        # Breakout Force Analysis (Feature 3: Herschel-Bulkley Gel Yield Stress)
+        breakout_res = self.drag.calculate_breakout_force(
+            tubing_profiles=tubing_profiles,
+            rod_string=self.rod_string,
+            fluid_model=self.fluid,
+            fluid_density_kg_m3=avg_density
         )
 
         # 10. Rod Float Analysis
@@ -298,7 +315,10 @@ class StatefulTwinEngine:
             water_rate_bpd=prod_res["water_rate_bpd"],
             steam_rate_t_d=steam_rate,
             motor_power_kw=dyno_res["prhp_kw"] / self.params.get_value("motor_eff"),
-            dt_days=dt_sim_days
+            dt_days=dt_sim_days,
+            heater_power_kw=heater_power_kw,
+            elec_tariff_inr_kwh=self.params.get_value("elec_tariff_inr_kwh", default=8.50),
+            boiler_efficiency=self.params.get_value("boiler_efficiency", default=0.85)
         )
 
         # 15. Wellbore Hydraulics
@@ -318,6 +338,8 @@ class StatefulTwinEngine:
                 "spm": round(spm, 1),
                 "stroke_inches": round(stroke_in, 1),
                 "steam_rate_t_d": round(steam_rate, 1),
+                "heater_power_kw": round(heater_power_kw, 2),
+                "heater_power_w": round(heater_power_w, 1),
                 "water_cut": self.params.get_value("water_cut")
             },
             "kinematics": kinematics,
@@ -344,8 +366,10 @@ class StatefulTwinEngine:
                 "float_index": float_res["float_index"],
                 "rod_float_status": float_res["status"],
                 "is_buckling": float_res["is_buckling"],
-                "compression_depth_m": float_res["compression_depth_m"]
+                "compression_depth_m": float_res["compression_depth_m"],
+                "breakout": breakout_res
             },
+            "breakout": breakout_res,
             "impact": impact_res,
             "dynamometer": dyno_res,
             "hydraulics": hydraulics,

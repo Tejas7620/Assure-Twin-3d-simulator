@@ -221,6 +221,104 @@ export class OptimizationView {
             </table>
           </div>
         </div>
+
+        <!-- FEATURE 4: FIELD-LEVEL STEAM SCHEDULER & BOILER ALLOCATION -->
+        <div class="ws-card" style="margin-top: 14px;">
+          <div class="ws-card-header">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span class="ws-card-title">FIELD-LEVEL MULTI-WELL STEAM SCHEDULER & BOILER ALLOCATION</span>
+              <span class="ws-pill-badge blue">MULTI-WELL TWIN</span>
+              <span class="ws-pill-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-size: 8px;">ASSUMPTION / SYNTHETIC</span>
+            </div>
+            <span class="ws-pill-badge safe" id="field-boiler-badge">BOILER: 120.0 T/D (SAFE)</span>
+          </div>
+          <div class="ws-card-body">
+            <div style="display: grid; grid-template-columns: 280px 1fr; gap: 14px;">
+              <!-- Left: Boiler KPI & Optimization Action -->
+              <div>
+                <div style="font-size: 9.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 10px;">
+                  Coordinates steam injection cycles across 4 wells to prevent oversubscribing the central steam generator.
+                </div>
+                <div class="ws-card" style="padding: 10px; background: rgba(255,255,255,0.02); margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Central Boiler Capacity:</span>
+                    <span style="font-weight: 700; color: #fff;" id="field-cap-val">120.0 t/d</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Peak Scheduled Steam:</span>
+                    <span style="font-weight: 700; color: var(--accent-green);" id="field-peak-val">100.0 t/d</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Unscheduled Deficit Avoided:</span>
+                    <span style="font-weight: 700; color: #f59e0b;" id="field-deficit-val">90.0 t/d</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 9px;">
+                    <span style="color: var(--text-muted);">Total 30-Day Oil Gain:</span>
+                    <span style="font-weight: 700; color: var(--accent-cyan);" id="field-oil-gain-val">+3,450 bbl</span>
+                  </div>
+                </div>
+                <button class="ws-mode-pill" id="field-btn-optimize" style="width: 100%; padding: 8px; font-weight: 700; font-size: 10px; cursor: pointer; background: rgba(14, 165, 233, 0.2); color: #0ea5e9; border: 1px solid #0ea5e9;">
+                  🔄 RE-OPTIMIZE FIELD SCHEDULE
+                </button>
+              </div>
+
+              <!-- Right: Multi-Well Timeline & Gantt Representation -->
+              <div id="field-timeline-container" style="overflow-x: auto;">
+                <table style="width: 100%; font-size: 9.5px; border-collapse: collapse; font-family: var(--font-mono);">
+                  <thead>
+                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); text-align: left;">
+                      <th style="padding: 6px;">WELL</th>
+                      <th style="padding: 6px;">CYCLE</th>
+                      <th style="padding: 6px;">PRIORITY</th>
+                      <th style="padding: 6px;">INJECTION WINDOW</th>
+                      <th style="padding: 6px;">STEAM RATE</th>
+                      <th style="padding: 6px;">SOAK</th>
+                      <th style="padding: 6px;">EST. PRODUCTION</th>
+                    </tr>
+                  </thead>
+                  <tbody id="field-wells-tbody">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                      <td style="padding: 6px; font-weight: 700; color: var(--accent-cyan);">BGW-17A</td>
+                      <td style="padding: 6px;">Cycle 3</td>
+                      <td style="padding: 6px;"><span class="ws-pill-badge safe">PRIORITY 1</span></td>
+                      <td style="padding: 6px; color: var(--accent-green);">Day 0 – 12</td>
+                      <td style="padding: 6px;">50 t/d (600 T)</td>
+                      <td style="padding: 6px;">Day 12 – 17</td>
+                      <td style="padding: 6px; color: var(--accent-green); font-weight: 700;">60.0 BOPD</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                      <td style="padding: 6px; font-weight: 700; color: #fff;">BW-02</td>
+                      <td style="padding: 6px;">Cycle 2</td>
+                      <td style="padding: 6px;"><span class="ws-pill-badge blue">PRIORITY 2</span></td>
+                      <td style="padding: 6px; color: var(--accent-green);">Day 0 – 10</td>
+                      <td style="padding: 6px;">50 t/d (500 T)</td>
+                      <td style="padding: 6px;">Day 10 – 15</td>
+                      <td style="padding: 6px; color: var(--accent-green); font-weight: 700;">45.3 BOPD</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                      <td style="padding: 6px; font-weight: 700; color: #fff;">BW-03</td>
+                      <td style="padding: 6px;">Cycle 2</td>
+                      <td style="padding: 6px;"><span class="ws-pill-badge watch">PRIORITY 3</span></td>
+                      <td style="padding: 6px; color: var(--accent-yellow);">Day 12 – 23</td>
+                      <td style="padding: 6px;">50 t/d (550 T)</td>
+                      <td style="padding: 6px;">Day 23 – 27</td>
+                      <td style="padding: 6px; color: var(--accent-green); font-weight: 700;">31.8 BOPD</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                      <td style="padding: 6px; font-weight: 700; color: #fff;">BW-04</td>
+                      <td style="padding: 6px;">Cycle 1</td>
+                      <td style="padding: 6px;"><span class="ws-pill-badge watch">PRIORITY 4</span></td>
+                      <td style="padding: 6px; color: var(--accent-yellow);">Day 12 – 22</td>
+                      <td style="padding: 6px;">60 t/d (600 T)</td>
+                      <td style="padding: 6px;">Day 22 – 28</td>
+                      <td style="padding: 6px; color: var(--accent-green); font-weight: 700;">22.2 BOPD</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -238,6 +336,29 @@ export class OptimizationView {
     bindSlider('#opt-w-steam', '#opt-w-steam-val');
     bindSlider('#opt-w-elec', '#opt-w-elec-val');
     bindSlider('#opt-w-risk', '#opt-w-risk-val');
+
+    // Field-level scheduler button handler
+    const fieldOptBtn = this._container.querySelector('#field-btn-optimize') as HTMLButtonElement;
+    fieldOptBtn?.addEventListener('click', async () => {
+      fieldOptBtn.disabled = true;
+      fieldOptBtn.textContent = '⏳ COMPUTING ALLOCATION...';
+      try {
+        const schedule = await assureApiClient.optimizeFieldSchedule();
+        if (schedule && schedule.well_candidates) {
+          const capEl = this._container.querySelector('#field-cap-val');
+          const peakEl = this._container.querySelector('#field-peak-val');
+          const deficitEl = this._container.querySelector('#field-deficit-val');
+          if (capEl) capEl.textContent = `${schedule.boiler_capacity_t_d.toFixed(1)} t/d`;
+          if (peakEl) peakEl.textContent = `${schedule.peak_scheduled_steam_t_d.toFixed(1)} t/d`;
+          if (deficitEl) deficitEl.textContent = `${schedule.boiler_deficit_avoided_t_d.toFixed(1)} t/d`;
+        }
+      } catch {
+        // Fallback
+      } finally {
+        fieldOptBtn.disabled = false;
+        fieldOptBtn.textContent = '🔄 RE-OPTIMIZE FIELD SCHEDULE';
+      }
+    });
 
     // Solve button handler
     const solveBtn = this._container.querySelector('#opt-btn-solve') as HTMLButtonElement;

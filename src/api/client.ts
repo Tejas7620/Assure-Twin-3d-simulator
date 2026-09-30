@@ -229,6 +229,13 @@ export class AssureApiClient {
     });
   }
 
+  async runRehearsal(spm: number, strokeInches: number, horizonDays: number = 30): Promise<any> {
+    return this.fetchJson('/api/v1/wells/BGW-17A/rehearsal', {
+      method: 'POST',
+      body: JSON.stringify({ spm, stroke_inches: strokeInches, horizon_days: horizonDays })
+    });
+  }
+
   // Optimization
   async solveOptimization(weights?: {
     crude_revenue?: number;
@@ -320,6 +327,22 @@ export class AssureApiClient {
         viscosities_cp: viscositiesCp,
         apply_to_active_well: applyToWell
       })
+    });
+  }
+
+  // Field-Level Steam Scheduling (Feature 4)
+  async getFieldSchedule(): Promise<any> {
+    return this.fetchJson<any>('/api/v1/field/schedule');
+  }
+
+  async optimizeFieldSchedule(payload?: {
+    boiler_capacity_t_d?: number;
+    planning_horizon_days?: number;
+    wells?: any[];
+  }): Promise<any> {
+    return this.fetchJson<any>('/api/v1/field/schedule/optimize', {
+      method: 'POST',
+      body: JSON.stringify(payload || {})
     });
   }
 }

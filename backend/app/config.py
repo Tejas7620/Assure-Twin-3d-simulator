@@ -43,5 +43,9 @@ class Settings(BaseSettings):
     # Simulation Timestep
     SIM_BROADCAST_HZ: float = 12.5
 
+    # Field-Level Steam Scheduling (Feature 4 - Time-Boxed)
+    FIELD_SCHEDULING_ENABLED: bool = os.getenv("FIELD_SCHEDULING_ENABLED", "True").lower() in ("1", "true", "yes")
+    FIELD_TOTAL_STEAM_CAPACITY_T_D: float = 120.0
+
 
 settings = Settings()

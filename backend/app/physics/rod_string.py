@@ -86,8 +86,10 @@ class TaperedRodStringModel:
 
         return {
             "buoyancy_factor": round(buoyancy_factor, 4),
+            "total_weight_air_n": round(self.total_weight_air_n, 1),
             "total_weight_air_kn": round(self.total_weight_air_n / 1000.0, 2),
             "total_weight_air_lb": round(self.total_weight_air_lb, 1),
+            "buoyant_weight_n": round(w_buoyant_n, 1),
             "buoyant_weight_kn": round(w_buoyant_kn, 2),
             "buoyant_weight_lb": round(w_buoyant_lb, 1)
         }

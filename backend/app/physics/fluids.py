@@ -23,7 +23,15 @@ class FluidProperties:
         astm_b: float = 3.65,
         thermal_expansion_coeff: float = 0.00075,
         water_cut: float = 0.128,
-        gas_oil_ratio: float = 12.0
+        gas_oil_ratio: float = 12.0,
+        # Herschel-Bulkley non-Newtonian yield-pseudoplastic parameters
+        # Provenance: SYNTHETIC / ASSUMPTION for Baghewala crude gel rheology
+        hb_yield_stress_ref_pa: float = 18.0,
+        hb_t_gel_c: float = 45.0,
+        hb_k_ref_pa_sn: float = 12.0,
+        hb_n_flow_index: float = 0.75,
+        hb_papanastasiou_m: float = 100.0,
+        hb_activation_energy_b: float = 3200.0
     ):
         self.mu_ref_cp = float(mu_ref_cp)
         self.t_ref_c = float(t_ref_c)
@@ -37,15 +45,85 @@ class FluidProperties:
         self.water_cut = float(water_cut)
         self.gas_oil_ratio = float(gas_oil_ratio)
 
+        # Herschel-Bulkley configuration
+        self.hb_yield_stress_ref_pa = float(hb_yield_stress_ref_pa)
+        self.hb_t_gel_c = float(hb_t_gel_c)
+        self.hb_k_ref_pa_sn = float(hb_k_ref_pa_sn)
+        self.hb_n_flow_index = float(hb_n_flow_index)
+        self.hb_papanastasiou_m = float(hb_papanastasiou_m)
+        self.hb_b = float(hb_activation_energy_b)
+
         # Standard specific gravity at 15.6°C (60°F): SG = 141.5 / (API + 131.5)
         self.sg_15_6 = 141.5 / (self.api_gravity + 131.5)
         self.density_ref_kg_m3 = self.sg_15_6 * 1000.0
 
-    def calculate_viscosity(self, temp_c: float) -> float:
+    def calculate_yield_stress(self, temp_c: float) -> float:
+        """
+        Computes static gel yield stress tau_y(T) in Pa.
+        Decays monotonically to 0 as temperature approaches and exceeds gel temperature (hb_t_gel_c).
+        Provenance: SYNTHETIC / ASSUMPTION for Baghewala heavy crude wax/asphaltene network.
+        """
+        t_c = float(temp_c)
+        if t_c >= self.hb_t_gel_c:
+            return 0.0
+        delta_t = max(0.0, self.hb_t_gel_c - t_c)
+        span = max(1.0, self.hb_t_gel_c - self.t_ref_c)
+        # Monotonic exponential decay terminating strictly at t_gel_c
+        factor = (delta_t / span) * math.exp(-0.05 * max(0.0, t_c - self.t_ref_c))
+        return float(max(0.0, self.hb_yield_stress_ref_pa * factor))
+
+    def calculate_consistency_index(self, temp_c: float) -> float:
+        """
+        Computes Herschel-Bulkley consistency index K(T) in Pa*s^n.
+        Follows Arrhenius/Andrade thermal thinning.
+        Provenance: SYNTHETIC / ASSUMPTION.
+        """
+        t_k = max(273.15, float(temp_c) + 273.15)
+        exponent = self.hb_b * ((1.0 / t_k) - (1.0 / self.t_ref_k))
+        exponent = max(-12.0, min(12.0, exponent))
+        return float(self.hb_k_ref_pa_sn * math.exp(exponent))
+
+    def calculate_apparent_viscosity(self, temp_c: float, shear_rate: float) -> float:
+        """
+        Calculates Herschel-Bulkley regularized Papanastasiou apparent viscosity in cP:
+        mu_app(gamma_dot, T) = K(T) * gamma_dot^(n-1) + tau_y(T) * (1 - exp(-m * gamma_dot)) / gamma_dot
+        Avoids singularity at gamma_dot -> 0.
+        Provenance: SYNTHETIC / ASSUMPTION.
+        """
+        gamma_dot = max(0.0, float(shear_rate))
+        tau_y = self.calculate_yield_stress(temp_c)
+        k = self.calculate_consistency_index(temp_c)
+        n = self.hb_n_flow_index
+        m = self.hb_papanastasiou_m
+
+        # Regularized shear rate for power-law component (prevents singularity as gamma_dot -> 0)
+        gamma_reg = max(1e-4, gamma_dot)
+        mu_power_law_pa_s = k * (gamma_reg ** (n - 1.0))
+
+        # Papanastasiou regularized yield term: tau_y * (1 - exp(-m * gamma_dot)) / gamma_dot
+        if gamma_dot < 1e-6:
+            mu_yield_pa_s = tau_y * m * (1.0 - 0.5 * m * gamma_dot)
+        else:
+            mu_yield_pa_s = tau_y * (1.0 - math.exp(-m * gamma_dot)) / gamma_dot
+
+        total_pa_s = mu_power_law_pa_s + mu_yield_pa_s
+        visc_cp = total_pa_s * 1000.0  # 1 Pa*s = 1000 cP
+        return float(max(2.0, min(150000.0, visc_cp)))
+
+    def calculate_viscosity(self, temp_c: float, shear_rate: Optional[float] = None) -> float:
         """
         Calculates dead oil dynamic viscosity in cP at given temperature (°C).
         Field-calibrated for Baghewala heavy crude.
+        Backward-compatible: if shear_rate is None and model_type != "herschel_bulkley",
+        evaluates Newtonian models (Andrade, Walther, Beggs-Robinson).
         """
+        if self.model_type == "herschel_bulkley":
+            actual_shear = 10.0 if shear_rate is None else float(shear_rate)
+            return self.calculate_apparent_viscosity(temp_c, actual_shear)
+
+        if shear_rate is not None and self.model_type not in ("andrade", "walther", "beggs_robinson"):
+            return self.calculate_apparent_viscosity(temp_c, float(shear_rate))
+
         t_c = max(0.0, float(temp_c))
         t_k = t_c + 273.15
 
@@ -133,5 +211,11 @@ class FluidProperties:
             "api_gravity": self.api_gravity,
             "model_type": self.model_type,
             "density_ref_kg_m3": self.density_ref_kg_m3,
-            "water_cut": self.water_cut
+            "water_cut": self.water_cut,
+            "hb_yield_stress_ref_pa": self.hb_yield_stress_ref_pa,
+            "hb_t_gel_c": self.hb_t_gel_c,
+            "hb_k_ref_pa_sn": self.hb_k_ref_pa_sn,
+            "hb_n_flow_index": self.hb_n_flow_index,
+            "hb_papanastasiou_m": self.hb_papanastasiou_m,
+            "provenance_hb": "SYNTHETIC / ASSUMPTION"
         }

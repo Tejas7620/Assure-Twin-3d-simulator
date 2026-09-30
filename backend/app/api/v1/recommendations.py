@@ -137,10 +137,15 @@ def _generate_recommendation(
     best = opt_result.get("best_candidate", {})
 
     if not candidates or not best or best.get("excluded", False):
+        from backend.app.assurance.workover_classifier import classify_workover
+        classification = classify_workover(twin_state)
+        rc = classification.get("reason_code", "NO_SAFE_RECOMMENDATION")
         return _abstain_response(
             reason="All optimization candidates violate mechanical safety constraints.",
             blocking=["Rod float margin < 10% across all evaluated operating points."],
-            required=["Inspect rod string, check buoyancy conditions, verify load cell calibration."]
+            required=["Inspect rod string, check buoyancy conditions, verify load cell calibration."],
+            reason_code=rc,
+            workover_classification=classification
         )
 
     # Step 2 — Rehearsal on twin clone (forward 21-day safety trial)
@@ -235,7 +240,9 @@ def _abstain_response(
     blocking: List[str],
     required: List[str],
     gate: Optional[Dict[str, Any]] = None,
-    rehearsal: Optional[Dict[str, Any]] = None
+    rehearsal: Optional[Dict[str, Any]] = None,
+    reason_code: Optional[str] = None,
+    workover_classification: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """Returns a NO_SAFE_RECOMMENDATION response — never a fallback hardcoded answer."""
     case_id = f"ABSTAIN-{_now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:6].upper()}"
@@ -253,6 +260,8 @@ def _abstain_response(
         "abstain_reason": reason,
         "blocking_reasons": blocking,
         "required_actions": required,
+        "reason_code": reason_code or "NO_SAFE_RECOMMENDATION",
+        "workover_classification": workover_classification,
         "assurance_status": "ABSTAINED",
         "assurance_detail": gate,
         "rehearsal_detail": rehearsal,

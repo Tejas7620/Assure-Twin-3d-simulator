@@ -109,6 +109,21 @@ class ParameterRegistry:
         self._register("steam_cost_usd_ton", "Steam Generation Cost", "economics", "$/ton", 10.0, 60.0, 24.50, 0.5, "Steam cost including boiler fuel and treatment")
         self._register("elec_tariff_kwh", "Electricity Tariff", "economics", "$/kWh", 0.03, 0.30, 0.095, 0.005, "Electric power utility tariff rate")
         self._register("water_cost_bbl", "Water Disposal Cost", "economics", "$/bbl", 0.20, 5.00, 1.80, 0.10, "Produced water handling and disposal expense")
+        self._register("elec_tariff_inr_kwh", "Electricity Tariff (INR)", "economics", "₹/kWh", 4.0, 15.0, 8.50, 0.25, "Grid electricity tariff in INR per kWh")
+        self._register("boiler_efficiency", "Boiler Efficiency", "economics", "frac", 0.60, 0.98, 0.85, 0.01, "Steam boiler thermal efficiency for equivalent energy accounting")
+
+        # GROUP 8: DOWNHOLE ELECTRIC HEATER (Feature 2 - ASSUMPTION)
+        self._register("heater_power_kw", "Downhole Heater Power", "heater", "kW", 0.0, 40.0, 0.0, 2.0, "Electrical heating power setpoint", optimizable=True)
+        self._register("heater_efficiency", "Heater Efficiency", "heater", "frac", 0.70, 1.0, 0.95, 0.01, "Electrical-to-thermal conversion efficiency")
+        self._register("heater_length_m", "Heater Element Length", "heater", "m", 5.0, 30.0, 12.0, 1.0, "Active heating cable length along payzone")
+        self._register("heater_max_linear_density_w_m", "Max Heater Power Density", "heater", "W/m", 1000.0, 5000.0, 3500.0, 100.0, "Skin temperature linear power limit")
+
+        # GROUP 9: HERSCHEL-BULKLEY RHEOLOGY (Feature 3 - ASSUMPTION / SYNTHETIC)
+        self._register("hb_yield_stress_ref_pa", "Gel Yield Stress (T_ref)", "rheology", "Pa", 0.0, 50.0, 18.0, 1.0, "Static yield stress at reference temp (SYNTHETIC)")
+        self._register("hb_t_gel_c", "Gel/Pour Point Temp", "rheology", "°C", 25.0, 65.0, 45.0, 1.0, "Temperature above which yield stress vanishes (ASSUMPTION)")
+        self._register("hb_k_ref_pa_sn", "Consistency Index K", "rheology", "Pa·sⁿ", 1.0, 40.0, 12.0, 0.5, "Herschel-Bulkley consistency index (SYNTHETIC)")
+        self._register("hb_n_flow_index", "Flow Behavior Index n", "rheology", "frac", 0.40, 1.0, 0.75, 0.05, "Power law flow index (<1 = shear thinning, SYNTHETIC)")
+        self._register("hb_papanastasiou_m", "Regularization Factor m", "rheology", "s", 10.0, 500.0, 100.0, 10.0, "Papanastasiou parameter avoiding zero-shear singularity")
 
     def get_parameter(self, key: str) -> Optional[ParameterDefinition]:
         return self._definitions.get(key)

@@ -30,6 +30,9 @@ FRACTURE_P_BAR       = 38.0   # Baghewala caprock fracture gradient limit
 DAILY_PROFIT_MIN_USD = -200.0  # Threshold below which lifting is uneconomic
 DYNO_MIN_POINTS      = 16     # Minimum points for a meaningful dynamometer card
 MAHAL_OOD_THRESHOLD  = 6.0   # Mahalanobis distance above which ML confidence is unreliable
+HEATER_MAX_KW        = 40.0   # API/Downhole maximum electrical heater power rating [kW] (ASSUMPTION)
+HEATER_MAX_LINEAR_DENSITY_W_M = 3500.0 # Linear power density skin-temperature limit [W/m] (ASSUMPTION)
+HEATER_DEFAULT_LENGTH_M       = 12.0   # Pay zone heater interval length [m] (ASSUMPTION)
 
 
 def _safe_float(state: Dict[str, Any], *path: str, default: float = 0.0) -> float:
@@ -83,8 +86,12 @@ def evaluate_assurance_gate(
     pump_fillage    = _safe_float(sim_state, "pump", "pump_fillage",         default=-1.0)
     sor             = _safe_float(sim_state, "economics", "instantaneous_sor", default=-1.0)
     daily_profit    = _safe_float(sim_state, "economics", "daily_profit_usd", default=0.0)
-    # CSS phase
     css_phase       = sim_state.get("css", {}).get("phase", "UNKNOWN")
+    # Cold-start gel breakout data (Feature 3 - Herschel-Bulkley)
+    breakout_info   = sim_state.get("breakout") or sim_state.get("loads", {}).get("breakout", {})
+    is_breakout_locked = bool(breakout_info.get("is_breakout_locked", False)) if isinstance(breakout_info, dict) else False
+    breakout_f_kn   = float(breakout_info.get("breakout_force_kn", 0.0)) if isinstance(breakout_info, dict) else 0.0
+    buoyant_w_kn    = float(breakout_info.get("buoyant_weight_kn", 0.0)) if isinstance(breakout_info, dict) else 0.0
     # Controls (apply override from candidate if provided)
     spm             = _safe_float(sim_state, "controls", "spm",              default=3.2)
     stroke_in       = _safe_float(sim_state, "controls", "stroke_inches",    default=64.0)
@@ -97,17 +104,30 @@ def evaluate_assurance_gate(
     mahal_dist      = _safe_float(sim_state, "surrogate", "mahalanobis_distance", default=0.0)
     model_divergence = _safe_float(ml_agreement, "relative_divergence_pct", default=0.0)
 
+    # Downhole Electric Heater controls & geometry (Feature 2 - ASSUMPTION)
+    heater_kw = _safe_float(sim_state, "controls", "heater_power_kw", default=0.0)
+    if heater_kw <= 0.0:
+        heater_w_val = _safe_float(sim_state, "thermal", "heater_power_w", default=0.0)
+        heater_kw = heater_w_val / 1000.0 if heater_w_val > 0.0 else _safe_float(sim_state, "controls", "heater_power_w", default=0.0) / 1000.0
+    heater_length_m = _safe_float(sim_state, "thermal", "heater_length_m", default=HEATER_DEFAULT_LENGTH_M)
+    if heater_length_m <= 0.0:
+        heater_length_m = HEATER_DEFAULT_LENGTH_M
+
     # Apply control overrides from candidate under test
     if controls:
         spm = float(controls.get("spm", spm))
         stroke_in = float(controls.get("stroke_inches", stroke_in))
+        if "heater_power_kw" in controls:
+            heater_kw = float(controls["heater_power_kw"])
+        elif "heater_power_w" in controls:
+            heater_kw = float(controls["heater_power_w"]) / 1000.0
 
     # ---- Helper: mark a key as missing/unavailable ----
     def _missing(value: float) -> bool:
         return value < 0.0
 
     # ======================================================================
-    # 12 Checkpoints
+    # 13 Cyber-Physical Checkpoints (Appended Gate 13: Electric Heater)
     # ======================================================================
     checks: List[Dict[str, Any]] = []
 
@@ -225,6 +245,13 @@ def evaluate_assurance_gate(
         float_ok = False
         float_status = "FAIL"
         float_detail = "Float margin unavailable — compression safety cannot be verified."
+    elif is_breakout_locked:
+        float_ok = False
+        float_status = "FAIL"
+        float_detail = (
+            f"Cold-start gel breakout force ({breakout_f_kn:.2f} kN) exceeds buoyant rod weight ({buoyant_w_kn:.2f} kN). "
+            f"Static crude yield stress blocks rod descent. SAFE SPM = 0 (thermal soak required)."
+        )
     elif is_buckling:
         float_ok = False
         float_status = "FAIL"
@@ -363,6 +390,43 @@ def evaluate_assurance_gate(
             f"stroke={stroke_in:.0f}\" (bounds [48, 120\"]). "
             f"{'Inside training distribution.' if ood_op_ok else 'OUTSIDE training distribution — ML predictions unreliable.'}"
         )
+    })
+
+    # --- 13. Downhole Electric Heater Operating Envelope (Feature 2) ---
+    # Max power: 40 kW; Max linear power density: 3500 W/m (skin-temperature / coking proxy)
+    heater_w = heater_kw * 1000.0
+    linear_density_w_m = heater_w / max(0.1, heater_length_m)
+
+    if heater_kw <= 0.0:
+        heater_ok = True
+        heater_status = "PASS"
+        heater_detail = "Downhole electric heater inactive (P=0.0 kW). Standard steam/CSS mode."
+    else:
+        power_ok = heater_kw <= HEATER_MAX_KW
+        density_ok = linear_density_w_m <= HEATER_MAX_LINEAR_DENSITY_W_M
+        heater_ok = power_ok and density_ok
+
+        if not power_ok:
+            heater_status = "FAIL"
+            heater_detail = (
+                f"Heater power {heater_kw:.1f} kW exceeds rating limit {HEATER_MAX_KW:.1f} kW."
+            )
+        elif not density_ok:
+            heater_status = "FAIL"
+            heater_detail = (
+                f"Heater linear power density {linear_density_w_m:.0f} W/m exceeds "
+                f"skin-temperature limit {HEATER_MAX_LINEAR_DENSITY_W_M:.0f} W/m (coking hazard)."
+            )
+        else:
+            heater_status = "PASS"
+            heater_detail = (
+                f"Heater operational: P={heater_kw:.1f} kW (limit {HEATER_MAX_KW:.0f} kW), "
+                f"linear density={linear_density_w_m:.0f} W/m (limit {HEATER_MAX_LINEAR_DENSITY_W_M:.0f} W/m)."
+            )
+
+    checks.append({
+        "id": 13, "name": "Downhole Electric Heater Limits", "category": "Thermal / Electrical",
+        "passed": heater_ok, "status": heater_status, "detail": heater_detail
     })
 
     # ======================================================================

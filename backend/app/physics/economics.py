@@ -39,7 +39,11 @@ class EconomicsModel:
         water_rate_bpd: float,
         steam_rate_t_d: float,
         motor_power_kw: float,
-        dt_days: float = 0.0
+        dt_days: float = 0.0,
+        heater_power_kw: float = 0.0,
+        elec_tariff_inr_kwh: float = 8.50,
+        inr_per_usd: float = 83.0,
+        boiler_efficiency: float = 0.85
     ) -> Dict[str, Any]:
         """
         Calculates daily revenue, energy costs, lifting costs, SOR, and net cash flow.
@@ -48,13 +52,25 @@ class EconomicsModel:
         q_water_bpd = max(0.0, float(water_rate_bpd))
         steam_t_d = max(0.0, float(steam_rate_t_d))
         power_kw = max(0.0, float(motor_power_kw))
+        heater_kw = max(0.0, float(heater_power_kw))
+        tariff_inr = float(elec_tariff_inr_kwh)
+        usd_to_inr = float(inr_per_usd)
+        b_eff = max(0.1, min(1.0, float(boiler_efficiency)))
 
         # 1. Gross Daily Revenue
         daily_revenue_usd = q_oil_bpd * self.oil_price_usd_bbl
 
         # 2. Operating Costs
         steam_cost_usd = steam_t_d * self.steam_cost_usd_ton
-        electricity_cost_usd = power_kw * 24.0 * self.elec_tariff
+        motor_kwh = power_kw * 24.0
+        heater_kwh = heater_kw * 24.0
+        total_elec_kwh = motor_kwh + heater_kwh
+
+        motor_elec_cost_usd = motor_kwh * self.elec_tariff
+        heater_elec_cost_usd = heater_kwh * self.elec_tariff
+        heater_elec_cost_inr = heater_kwh * tariff_inr
+        electricity_cost_usd = motor_elec_cost_usd + heater_elec_cost_usd
+
         water_handling_usd = q_water_bpd * self.water_cost
         total_variable_cost_usd = steam_cost_usd + electricity_cost_usd + water_handling_usd
         total_daily_cost_usd = total_variable_cost_usd + self.fixed_daily_opex
@@ -62,7 +78,14 @@ class EconomicsModel:
         # 3. Net Daily Profit
         daily_profit_usd = daily_revenue_usd - total_daily_cost_usd
 
-        # 4. Steam-to-Oil Ratio (SOR): tons of steam injected / tons of oil produced
+        # 4. Energy Accounting & kWh per barrel (Feature 2)
+        kwh_per_bbl = round(total_elec_kwh / max(0.01, q_oil_bpd), 2)
+        heater_kwh_per_bbl = round(heater_kwh / max(0.01, q_oil_bpd), 2)
+        steam_energy_gj = round((steam_t_d * 1000.0 * 2.278e6) / 1e9, 2)
+        heater_electric_energy_gj = round((heater_kwh * 3.6e6) / 1e9, 2)
+        combined_energy_equivalent_gj = round(steam_energy_gj + (heater_electric_energy_gj / b_eff), 2)
+
+        # 5. Steam-to-Oil Ratio (SOR): tons of steam injected / tons of oil produced
         # Oil density ~ 0.92 t/m3; 1 bbl = 0.158987 m3 -> 1 bbl ~ 0.14627 tons
         oil_t_d = q_oil_bpd * 0.14627
         if oil_t_d > 0.01:
@@ -87,6 +110,9 @@ class EconomicsModel:
             "daily_revenue_usd": round(daily_revenue_usd, 2),
             "steam_cost_usd": round(steam_cost_usd, 2),
             "electricity_cost_usd": round(electricity_cost_usd, 2),
+            "motor_elec_cost_usd": round(motor_elec_cost_usd, 2),
+            "heater_elec_cost_usd": round(heater_elec_cost_usd, 2),
+            "heater_elec_cost_inr": round(heater_elec_cost_inr, 2),
             "water_handling_usd": round(water_handling_usd, 2),
             "total_daily_cost_usd": round(total_daily_cost_usd, 2),
             "daily_profit_usd": round(daily_profit_usd, 2),
@@ -96,5 +122,13 @@ class EconomicsModel:
             "cumulative_revenue_usd": round(self.cumulative_revenue_usd, 1),
             "cumulative_cost_usd": round(self.cumulative_cost_usd, 1),
             "cumulative_profit_usd": round(self.cumulative_profit_usd, 1),
-            "lifting_cost_per_bbl": round(total_daily_cost_usd / max(0.1, q_oil_bpd), 2)
+            "lifting_cost_per_bbl": round(total_daily_cost_usd / max(0.1, q_oil_bpd), 2),
+            # Feature 2 Metrics
+            "kwh_per_bbl": kwh_per_bbl,
+            "heater_kwh_per_bbl": heater_kwh_per_bbl,
+            "steam_energy_gj": steam_energy_gj,
+            "heater_electric_energy_gj": heater_electric_energy_gj,
+            "combined_energy_equivalent_gj": combined_energy_equivalent_gj,
+            "boiler_efficiency_used": b_eff,
+            "elec_tariff_inr_kwh": tariff_inr,
         }

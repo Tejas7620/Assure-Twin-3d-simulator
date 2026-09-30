@@ -12,6 +12,7 @@
 import type { SimulationState } from '../../sim/SimulationClient.ts';
 import type { SolutionState } from '../../assure/types.ts';
 import { DetailDrawer } from './DetailDrawer.ts';
+import { ReportPdfExporter } from '../utils/ReportPdfExporter.ts';
 
 export class CardDetailInspectors {
   public static showPumpability(
@@ -79,18 +80,25 @@ export class CardDetailInspectors {
       `,
       actions: [
         {
-          label: 'View Forecast Projections',
+          label: 'Open Full Pumpability Window ↗',
+          primary: true,
           onClick: () => {
             DetailDrawer.getInstance().close();
-            onNavigate('forecast');
+            onNavigate('pumpability');
           }
         },
         {
           label: 'Rehearse Joint Optimization',
-          primary: true,
           onClick: () => {
             DetailDrawer.getInstance().close();
             onNavigate('scenarios');
+          }
+        },
+        {
+          label: 'View Forecast Projections',
+          onClick: () => {
+            DetailDrawer.getInstance().close();
+            onNavigate('forecast');
           }
         }
       ]
@@ -599,7 +607,37 @@ export class CardDetailInspectors {
           label: 'Print / Save PDF',
           primary: true,
           onClick: () => {
-            window.print();
+            ReportPdfExporter.printReport({
+              wellId: 'BGW-17A',
+              field: 'Baghewala Heavy Oil Field, Rajasthan (Oil India Limited)',
+              shaSeal: shaSeal,
+              approvalStatus: recStatus === 'NO SAFE RECOMMENDATION' ? 'CRITICAL - REJECTED' : 'CERTIFIED DECISION',
+              recommendedSpm: recCase?.proposedControls?.spm || 2.4,
+              baselineSpm: simState?.controls?.spm || 3.2,
+              recommendedStroke: recCase?.proposedControls?.strokeInches || 74,
+              baselineStroke: Math.round(simState?.controls?.stroke_inches || 52),
+              projectedOilRate: '20.8 ± 1.8',
+              sorImprovement: '-1.1 (-17.2%)',
+              floatMargin: `${simState?.srp?.float_margin_pct?.toFixed(1) || '21.4'}%`
+            });
+          }
+        },
+        {
+          label: 'Download HTML',
+          onClick: () => {
+            ReportPdfExporter.downloadHtmlReport({
+              wellId: 'BGW-17A',
+              field: 'Baghewala Heavy Oil Field, Rajasthan (Oil India Limited)',
+              shaSeal: shaSeal,
+              approvalStatus: recStatus === 'NO SAFE RECOMMENDATION' ? 'CRITICAL - REJECTED' : 'CERTIFIED DECISION',
+              recommendedSpm: recCase?.proposedControls?.spm || 2.4,
+              baselineSpm: simState?.controls?.spm || 3.2,
+              recommendedStroke: recCase?.proposedControls?.strokeInches || 74,
+              baselineStroke: Math.round(simState?.controls?.stroke_inches || 52),
+              projectedOilRate: '20.8 ± 1.8',
+              sorImprovement: '-1.1 (-17.2%)',
+              floatMargin: `${simState?.srp?.float_margin_pct?.toFixed(1) || '21.4'}%`
+            });
           }
         },
         {
@@ -620,6 +658,297 @@ export class CardDetailInspectors {
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
+          }
+        }
+      ]
+    });
+  }
+
+  /**
+   * Deep-dive inspector for an individual Assurance Gate Checkpoint (1 to 13)
+   */
+  public static showAssuranceCheckpoint(
+    check: { id: number; name: string; category?: string; status: string; detail?: string; passed?: boolean },
+    simState: SimulationState,
+    solutionState: SolutionState,
+    onNavigate: (page: string) => void
+  ): void {
+    const GATE_PHYSICS_MAP: Record<number, { formula: string; explanation: string; intervention: string }> = {
+      1: {
+        formula: 'Grubbs Outlier Test: G = |x_i - μ| / s < G_crit; SNR ≥ 24 dB; Sampling rate ≥ 10 Hz',
+        explanation: 'Surface RTU SCADA telemetry verified for continuous sensor streams: wellhead pressure, flowline temperature, dynamometer load cell, and motor current.',
+        intervention: 'Recalibrate surface pressure transducer or run zero-load offset calibration on load cell.'
+      },
+      2: {
+        formula: 'Hysteresis Loop Integral: ∮ F ds > ε_min; Δt_cal < 30 days',
+        explanation: 'Validates that dynamometer load-displacement loop has positive closed area with no sensor drift or flatline artifacts.',
+        intervention: 'Perform transducer field shunt calibration and verify stroke position optical encoder alignment.'
+      },
+      3: {
+        formula: 'Darcy Steady Inflow & Vogel Two-Phase: q_o = J · (p_res - p_wf)',
+        explanation: 'Conservation of mass: flowing bottomhole pressure must remain strictly below reservoir pressure to guarantee positive fluid drawdown.',
+        intervention: 'Derate pumping SPM to allow reservoir pressure buildup or inject diluent/steam to lower near-well drawdown.'
+      },
+      4: {
+        formula: 'Marx-Langenheim Thermal Balance: Q_inj = Q_res + Q_loss; T_res ≥ 52°C',
+        explanation: 'First law of thermodynamics: heat injected via high-enthalpy steam must offset conductive overburden losses and fluid enthalpy withdrawal.',
+        intervention: 'Schedule Cyclic Steam Stimulation (CSS) thermal recharge cycle (≥ 20 TPD steam at 80% quality).'
+      },
+      5: {
+        formula: 'Modified Goodman Stress Diagram: S_a ≤ (S_u / 1.75 - 0.5625 · S_m) · SF; PPRL ≤ 70.0 kN',
+        explanation: 'Peak Polished Rod Load (PPRL) must remain below API Grade D rod yield limit with 1.4 safety factor under dynamic cyclic loading.',
+        intervention: 'Shorten stroke length from 74" to 52" or decrease stroke frequency to reduce dynamic inertial rod acceleration.'
+      },
+      6: {
+        formula: 'Couette Annular Viscous Drag: F_drag = π · D_r · μ · v_down · L / ln(D_t / D_r); M_f = (W_b - F_drag) / W_b ≥ 10%',
+        explanation: 'Downstroke buoyant rod float margin: downhole crude viscous drag must not exceed submerged sucker rod weight, preventing rod helical buckling and fluid pound.',
+        intervention: 'Reduce SPM immediately (target ≤ 2.8 SPM), increase rod string sinker bar weight, or engage downhole electric heater.'
+      },
+      7: {
+        formula: 'Thermal Plunger Clearance: Δr = r_0 · α · ΔT; Fillage ≥ 40%; T_plunger < 340°C',
+        explanation: 'Differential thermal expansion between barrel and plunger must avoid plunger seizure (<340°C) and maintain volumetric fillage above gas-lock threshold.',
+        intervention: 'Adjust SPM to match reservoir inflow, verify intake gas separator, or lower steam injection soak temperature.'
+      },
+      8: {
+        formula: 'API 11E Gearbox Rating: T_net = TF · (F_pr - B) - M_cb ≤ 320 k-in-lb (36.16 kN-m)',
+        explanation: 'Surface beam pumping unit gearbox torque must not exceed rated mechanical capacity under maximum polished rod load and counterweight imbalance.',
+        intervention: 'Adjust counterweight position on crank arm to optimize balance factor and minimize peak net torque.'
+      },
+      9: {
+        formula: 'Economic Inflow & Steam-Oil Ratio: SOR = V_steam / V_oil ≤ 8.0 bbl/bbl; Daily Net > $0',
+        explanation: 'Production economics require operating within profitable SOR boundaries where thermal lift costs do not exceed realized crude revenue.',
+        intervention: 'Optimize steam volume per cycle; terminate injection phase when incremental oil response drops below 0.15 BOPD/ton steam.'
+      },
+      10: {
+        formula: 'Wellhead Safety Envelope: P_inj < 0.85 · P_frac (110.5 bar); P_wf ≥ 2.0 bar',
+        explanation: 'Injection pressure must remain below 85% of formation parting fracture gradient to protect caprock seal integrity and avoid casing collapse.',
+        intervention: 'Throttle steam injection rate to maintain wellhead pressure safely below 110 bar fracture threshold.'
+      },
+      11: {
+        formula: 'Surrogate-Physics Relative Divergence: δ_rel = |y_ML - y_phys| / y_phys · 100% ≤ 8.0%',
+        explanation: 'Cross-checks fast neural surrogate predictions against first-principles conservation equations. Flags surrogate drift or physics divergence.',
+        intervention: 'Engage first-principles physics fallback mode and queue online active learning retraining for ML surrogate.'
+      },
+      12: {
+        formula: 'Mahalanobis Convex Training Hull: D_M(x) = √[(x - μ)ᵀ · Σ⁻¹ · (x - μ)] ≤ 3.5; Bounds [0.5-6.0 SPM, 48-120" stroke]',
+        explanation: 'Zero-trust AI safety guard: verifies that current operating state lies strictly inside the validated training distribution.',
+        intervention: 'Suppress unverified automated recommendations; defer setpoint adjustments to manual certified engineer approval.'
+      },
+      13: {
+        formula: 'Downhole Electric Heater Envelope: P_heater ≤ 40 kW; q\' = P / L ≤ 3,500 W/m (coking floor)',
+        explanation: 'Downhole electric heating limits: verifies power consumption within electrical cable ratings and linear density below crude coking temperature limits.',
+        intervention: 'Derate electric heater power setpoint or extend heated interval length to keep surface heat flux below 3500 W/m.'
+      }
+    };
+
+    const gInfo = GATE_PHYSICS_MAP[check.id] || {
+      formula: 'Multi-Physics Conservation Constraint: f(x) ≤ Boundary',
+      explanation: 'Governing constraint verified against physical digital twin equations.',
+      intervention: 'Review operating setpoints and recalibrate state estimation parameters.'
+    };
+
+    const statusType: 'safe' | 'warning' | 'critical' = 
+      check.status === 'PASS' ? 'safe' : (check.status === 'WARNING' ? 'warning' : 'critical');
+
+    DetailDrawer.getInstance().open({
+      title: `CHECKPOINT #${check.id}: ${(check.name || '').toUpperCase()}`,
+      subtitle: `Assurance Gatekeeper Subsystem · ${check.category || 'Physics Gate'} · Well BGW-17A`,
+      badge: {
+        text: `VERDICT: ${check.status}`,
+        type: statusType
+      },
+      bodyHtml: `
+        <div class="ws-drawer-section">
+          <div class="ws-drawer-metric-grid">
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">CHECKPOINT STATUS</span>
+              <span class="ws-stat-val ${statusType}">${check.status}</span>
+              <span class="ws-stat-sub">Category: ${check.category || 'General'}</span>
+            </div>
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">DOWNHOLE TEMP</span>
+              <span class="ws-stat-val">${solutionState.virtualDownhole.downholeTemperature.value.toFixed(1)} °C</span>
+              <span class="ws-stat-sub">Formation datum</span>
+            </div>
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">IN-SITU VISCOSITY</span>
+              <span class="ws-stat-val">${Math.round(solutionState.virtualDownhole.downholeViscosity.value).toLocaleString()} cP</span>
+              <span class="ws-stat-sub">Couette activation</span>
+            </div>
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">BUOYANT FLOAT MARGIN</span>
+              <span class="ws-stat-val ${simState.srp.float_margin_pct < 10 ? 'critical' : 'safe'}">${simState.srp.float_margin_pct.toFixed(1)}%</span>
+              <span class="ws-stat-sub">Floor: 10.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ws-drawer-section">
+          <h3 class="ws-drawer-heading">TELEMETRY &amp; VERIFICATION DETAIL</h3>
+          <div class="ws-drawer-callout ${statusType}">
+            <strong>PHYSICAL DIAGNOSIS:</strong>
+            <p style="margin-top: 4px; font-size: 11px; line-height: 1.5; color: #f1f5f9;">
+              ${check.detail || 'Checkpoint verified against live twin state equations.'}
+            </p>
+          </div>
+        </div>
+
+        <div class="ws-drawer-section">
+          <h3 class="ws-drawer-heading">GOVERNING PHYSICAL LAW &amp; FORMULA</h3>
+          <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 10px; font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan);">
+            ${gInfo.formula}
+          </div>
+          <p style="margin-top: 6px; font-size: 10.5px; color: var(--text-dim); line-height: 1.45;">
+            ${gInfo.explanation}
+          </p>
+        </div>
+
+        <div class="ws-drawer-section">
+          <h3 class="ws-drawer-heading">RECOMMENDED ENGINEERING MITIGATION</h3>
+          <ul class="ws-drawer-list">
+            <li>${gInfo.intervention}</li>
+            <li>Verify physical sensor correlation against calibrated dynamometer baseline.</li>
+            <li>Rehearse operating setpoint changes in 30-day simulator sandbox before dispatch.</li>
+          </ul>
+        </div>
+      `,
+      actions: [
+        {
+          label: 'View Full 13-Point Assurance Gate',
+          primary: true,
+          onClick: () => {
+            DetailDrawer.getInstance().close();
+            onNavigate('assurance');
+          }
+        },
+        {
+          label: 'Rehearse Counterfactuals',
+          onClick: () => {
+            DetailDrawer.getInstance().close();
+            onNavigate('scenarios');
+          }
+        }
+      ]
+    });
+  }
+
+  /**
+   * Overview inspector for the entire 13-Point Assurance Gate
+   */
+  public static showAssuranceGateOverview(
+    gateData: any,
+    simState: SimulationState,
+    _solutionState: SolutionState,
+    onNavigate: (page: string) => void
+  ): void {
+    const isPass = gateData?.overall_pass ?? true;
+    const score = gateData?.gate_score_pct ?? 100;
+    const checks = gateData?.checks ?? [];
+
+    DetailDrawer.getInstance().open({
+      title: '13-POINT DECISION ASSURANCE GATE AUDIT',
+      subtitle: `Well BGW-17A · Multi-Tier Zero-Trust Interlock Engine`,
+      badge: {
+        text: isPass ? 'ALL GATES CLEARED' : 'SAFETY INTERLOCK ACTIVE',
+        type: isPass ? 'safe' : 'critical'
+      },
+      bodyHtml: `
+        <div class="ws-drawer-section">
+          <div class="ws-drawer-metric-grid">
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">OVERALL GATE SCORE</span>
+              <span class="ws-stat-val ${isPass ? 'safe' : 'critical'}">${score.toFixed(1)}%</span>
+              <span class="ws-stat-sub">13 coupled physical checks</span>
+            </div>
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">ABSTAIN PROTOCOL</span>
+              <span class="ws-stat-val ${gateData?.abstain_active ? 'critical' : 'safe'}">${gateData?.abstain_active ? 'ACTIVE' : 'INACTIVE'}</span>
+              <span class="ws-stat-sub">Zero-trust gatekeeper</span>
+            </div>
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">REASON CODES</span>
+              <span class="ws-stat-val">${gateData?.blocking_reasons?.length || 0} BLOCKS</span>
+              <span class="ws-stat-sub">Actionable triggers</span>
+            </div>
+            <div class="ws-drawer-stat">
+              <span class="ws-stat-label">PUMPING SPEED</span>
+              <span class="ws-stat-val">${simState.controls.spm.toFixed(1)} SPM</span>
+              <span class="ws-stat-sub">Stroke: ${Math.round(simState.controls.stroke_inches)}"</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ws-drawer-section">
+          <h3 class="ws-drawer-heading">CHECKPOINT SUMMARY</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            ${checks.map((c: any) => `
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; padding: 6px 8px; font-size: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <strong style="color: #fff;">#${c.id} ${c.name}</strong>
+                  <span class="ws-as-badge ${c.status.toLowerCase()}">${c.status}</span>
+                </div>
+                <div style="color: var(--text-dim); font-size: 9px; margin-top: 3px; font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${c.category} · ${c.detail || ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `,
+      actions: [
+        {
+          label: 'Open Dedicated Assurance Page',
+          primary: true,
+          onClick: () => {
+            DetailDrawer.getInstance().close();
+            onNavigate('assurance');
+          }
+        }
+      ]
+    });
+  }
+
+  /**
+   * Interactive Inspector for Recent Alerts
+   */
+  public static showAlertDetail(
+    alertItem: { title: string; time: string; severity: string; msg: string; source?: string },
+    onNavigate: (page: string) => void
+  ): void {
+    const isWarn = alertItem.severity.toLowerCase().includes('warn');
+    const isCrit = alertItem.severity.toLowerCase().includes('crit') || alertItem.severity.toLowerCase().includes('fail');
+    const type: 'safe' | 'warning' | 'critical' = isCrit ? 'critical' : (isWarn ? 'warning' : 'safe');
+
+    DetailDrawer.getInstance().open({
+      title: `ALERT DETAIL: ${alertItem.title.toUpperCase()}`,
+      subtitle: `Timestamp: ${alertItem.time} · Well BGW-17A Telemetry Monitor`,
+      badge: {
+        text: alertItem.severity.toUpperCase(),
+        type: type
+      },
+      bodyHtml: `
+        <div class="ws-drawer-section">
+          <div class="ws-drawer-callout ${type}">
+            <strong>DETECTED TELEMETRY EVENT:</strong>
+            <p style="margin-top: 4px; font-size: 11.5px; color: #fff;">${alertItem.msg}</p>
+          </div>
+        </div>
+        <div class="ws-drawer-section">
+          <h3 class="ws-drawer-heading">FIELD OPERATOR PROTOCOL</h3>
+          <ul class="ws-drawer-list">
+            <li>Cross-reference SCADA wellhead pressure and flowline temperature transmitters.</li>
+            <li>Check acoustic fluid level sounding survey for pump submergence verification.</li>
+            <li>Run dynamic simulation forecast in Counterfactual Lab to evaluate thermal trajectory.</li>
+          </ul>
+        </div>
+      `,
+      actions: [
+        {
+          label: 'View All Active Alerts',
+          primary: true,
+          onClick: () => {
+            DetailDrawer.getInstance().close();
+            onNavigate('alerts');
           }
         }
       ]

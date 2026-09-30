@@ -34,10 +34,12 @@ class SRPPhysicsController:
         current_fillage: float,
         current_pprl_kn: float,
         current_viscosity_cp: float,
-        operating_regime: str = "PUMP_LIMITED"
+        operating_regime: str = "PUMP_LIMITED",
+        breakout_locked: bool = False
     ) -> Dict[str, Any]:
         """
         Computes the optimal (SPM, Stroke) setpoint adjustments.
+        Enforces SAFE SPM = 0 if breakout_locked due to static gel yield stress.
         """
         spm = float(current_spm)
         stroke = float(current_stroke_in)
@@ -45,6 +47,25 @@ class SRPPhysicsController:
         fillage = float(current_fillage)
         pprl = float(current_pprl_kn)
         visc = float(current_viscosity_cp)
+
+        # 0. SAFETY CRITICAL: Cold-Start Gel Breakout Lock
+        if breakout_locked:
+            return {
+                "status": "GEL_LOCKED_SHUTIN",
+                "current_spm": round(spm, 1),
+                "recommended_spm": 0.0,
+                "current_stroke_in": round(stroke, 1),
+                "recommended_stroke_in": round(stroke, 1),
+                "float_margin_pct": 0.0,
+                "pump_fillage_pct": round(fillage * 100.0, 1),
+                "actions": [
+                    "ABSTAIN / SHUT-IN: Static yield stress breakout force exceeds buoyant rod string weight. "
+                    "Downward rod descent is physically locked. SAFE SPM = 0. "
+                    "Pre-heating or steam thermal soak required before stroke initiation."
+                ],
+                "is_action_required": True,
+                "is_gel_locked": True
+            }
 
         target_spm = spm
         target_stroke = stroke
