@@ -1,0 +1,33 @@
+# Version control
+.git
+.gitignore
+
+# Node dependencies and build artifacts
+node_modules
+dist
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Python caches and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases & secrets
+assure_twin.db
+*.db
+*.sqlite3
+.env
+.env.local
+.env.*.local
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

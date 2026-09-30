@@ -13,6 +13,7 @@ import type { SimulationState } from '../../sim/SimulationClient.ts';
 import type { SolutionState } from '../../assure/types.ts';
 import { DetailDrawer } from './DetailDrawer.ts';
 import { ReportPdfExporter } from '../utils/ReportPdfExporter.ts';
+import { assureApiClient } from '../../api/client.ts';
 
 export class CardDetailInspectors {
   public static showPumpability(
@@ -520,7 +521,7 @@ export class CardDetailInspectors {
   ): Promise<void> {
     let reportData: any = null;
     try {
-      const resp = await fetch('http://localhost:8000/api/v1/reports/engineering', {
+      const resp = await fetch(`${assureApiClient.getBaseUrl()}/api/v1/reports/engineering`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

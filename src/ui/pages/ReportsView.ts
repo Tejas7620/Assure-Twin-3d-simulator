@@ -10,6 +10,7 @@
 
 import type { AssureTwinManager } from '../../assure/AssureTwinManager.ts';
 import { ReportPdfExporter, type ReportExportData } from '../utils/ReportPdfExporter.ts';
+import { assureApiClient } from '../../api/client.ts';
 
 export class ReportsView {
   public _container: HTMLElement;
@@ -234,7 +235,7 @@ export class ReportsView {
       let data = this._lastReportData;
       if (!data) {
         try {
-          const resp = await fetch('http://localhost:8000/api/v1/reports/engineering', {
+          const resp = await fetch(`${assureApiClient.getBaseUrl()}/api/v1/reports/engineering`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

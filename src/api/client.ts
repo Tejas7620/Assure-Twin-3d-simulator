@@ -135,8 +135,23 @@ export interface RecommendationCase {
 export class AssureApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string = 'http://127.0.0.1:8000') {
-    this.baseUrl = baseUrl;
+  constructor(baseUrl?: string) {
+    if (baseUrl) {
+      this.baseUrl = baseUrl;
+    } else {
+      const envUrl = (import.meta as any).env?.VITE_API_URL;
+      if (envUrl) {
+        this.baseUrl = envUrl;
+      } else if (typeof window !== 'undefined' && window.location.port !== '5173') {
+        this.baseUrl = window.location.origin;
+      } else {
+        this.baseUrl = 'http://127.0.0.1:8000';
+      }
+    }
+  }
+
+  public getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   private async fetchJson<T>(path: string, options?: RequestInit): Promise<T | null> {

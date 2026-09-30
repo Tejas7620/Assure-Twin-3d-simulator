@@ -1,30 +1,44 @@
 services:
-  backend:
+  # ---------------------------------------------------------------------------
+  # Unified Production App (Frontend 3D Visualizer + FastAPI + WebSocket on :8000)
+  # ---------------------------------------------------------------------------
+  app:
     build:
       context: .
-      dockerfile: backend/Dockerfile
-    container_name: assure-twin-backend
+      dockerfile: Dockerfile
+    container_name: assure-twin-app
     ports:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=sqlite:///./assure_twin.db
+      - SECRET_KEY=assure-twin-production-deploy-key
+      - CORS_ORIGINS=*
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 3
 
-  frontend:
+  # ---------------------------------------------------------------------------
+  # Development Frontend (Vite HMR on :5173 with backend proxy)
+  # Run with: docker compose --profile dev up
+  # ---------------------------------------------------------------------------
+  frontend-dev:
+    profiles: ["dev"]
     image: node:20-alpine
-    container_name: assure-twin-frontend
+    container_name: assure-twin-frontend-dev
     working_dir: /app
     volumes:
       - ./:/app
+      - /app/node_modules
     ports:
       - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000/ws/sim
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
-      - backend
+      - app
     restart: unless-stopped

@@ -109,3 +109,18 @@ async def global_exception_handler(request: Request, exc: Exception):
             "path": request.url.path
         }
     )
+
+import os
+from fastapi.staticfiles import StaticFiles
+
+# Mount built frontend dist if available (supports unified containerized deployment)
+_candidate_dist_paths = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "dist")),
+    os.path.abspath(os.path.join(os.getcwd(), "dist")),
+    os.path.abspath("/app/dist")
+]
+for _dist in _candidate_dist_paths:
+    if os.path.exists(_dist) and os.path.isdir(_dist) and os.path.exists(os.path.join(_dist, "index.html")):
+        app.mount("/", StaticFiles(directory=_dist, html=True), name="frontend")
+        break
+

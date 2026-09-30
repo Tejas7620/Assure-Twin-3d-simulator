@@ -93,8 +93,20 @@ export class SimulationClient {
     economics: { power_kw: 14.2, daily_kwh: 340.8, energy_per_bbl: 10.5, sor: 6.7, cumulative_steam_tons: 1510.0 }
   };
 
-  constructor(url: string = 'ws://127.0.0.1:8000/ws/sim') {
-    this.url = url;
+  constructor(url?: string) {
+    if (url) {
+      this.url = url;
+    } else {
+      const envWs = (import.meta as any).env?.VITE_WS_URL;
+      if (envWs) {
+        this.url = envWs;
+      } else if (typeof window !== 'undefined' && window.location.port !== '5173') {
+        const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        this.url = `${proto}//${window.location.host}/ws/sim`;
+      } else {
+        this.url = 'ws://127.0.0.1:8000/ws/sim';
+      }
+    }
     this.connect();
     // Run local animation step loop for kinematics smoothness
     this.startLocalKinematicsLoop();
